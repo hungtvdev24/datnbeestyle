@@ -8,6 +8,7 @@ class DanhMuc {
 class SanPham {
   String id;
   String name;
+  double originalPrice;
   double price;
   String img;
   String des;
@@ -15,6 +16,6 @@ class SanPham {
   String idDanhMuc;
   int quan;
 
-  SanPham(this.id, this.name, this.price, this.img, this.des, this.eval,
-      this.idDanhMuc, this.quan);
+  SanPham(this.id, this.name, this.originalPrice, this.price, this.img,
+      this.des, this.eval, this.idDanhMuc, this.quan);
 }
