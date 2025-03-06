@@ -20,7 +20,7 @@ class BeeStyleApp extends StatelessWidget {
       ),
       home: const ProfileScreen(),
       debugShowMaterialGrid: false,
-      title: 'Hồ sơ cá nhân',
+      // title: 'Hồ sơ cá nhân',
     );
   }
 }
