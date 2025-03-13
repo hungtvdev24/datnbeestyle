@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:beestyle/components/list_tile/divider_list_tile.dart';
+import 'package:datnbeestyle/components/list_tile/divider_list_tile.dart';
 
 class ProfileMenuListTile extends StatelessWidget {
   const ProfileMenuListTile({

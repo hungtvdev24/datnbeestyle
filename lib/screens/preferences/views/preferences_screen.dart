@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:beestyle/constants.dart';
+import 'package:datnbeestyle/constants.dart';
 
-import '../components/prederence_list_tile.dart';
+import 'components/prederence_list_tile.dart';
 
 class PreferencesScreen extends StatelessWidget {
   const PreferencesScreen({super.key});

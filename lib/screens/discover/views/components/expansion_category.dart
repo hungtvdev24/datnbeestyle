@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:beestyle/route/screen_export.dart';
+import 'package:datnbeestyle/route/screen_export.dart';
 
 import '../../../../constants.dart';
 

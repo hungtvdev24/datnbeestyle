@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:beestyle/components/list_tile/divider_list_tile.dart';
-import 'package:beestyle/components/network_image_with_loader.dart';
-import 'package:beestyle/constants.dart';
-import 'package:beestyle/route/screen_export.dart';
+import 'package:datnbeestyle/components/list_tile/divider_list_tile.dart';
+import 'package:datnbeestyle/components/network_image_with_loader.dart';
+import 'package:datnbeestyle/constants.dart';
+import 'package:datnbeestyle/route/screen_export.dart';
 
 import 'components/profile_card.dart';
 import 'components/profile_menu_item_list_tile.dart';
