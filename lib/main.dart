@@ -1,12 +1,6 @@
-<<<<<<< HEAD
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'screens/home_screen.dart';
-=======
-git checkout -b feature/longvt
-import 'package:flutter/material.dart';
-import 'screens/home/profile_screen.dart'; // Import ProfileScreen
->>>>>>> origin/main
+import '/screens/home/profile_screen.dart'; // Import ProfileScreen
 
 void main() {
   runApp(const BeeStyleApp());
@@ -18,19 +12,15 @@ class BeeStyleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-<<<<<<< HEAD
       title: 'BeeStyle',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.purple,
         textTheme: GoogleFonts.robotoTextTheme(Theme.of(context).textTheme),
       ),
-      home: const HomeScreen(),
-=======
-      debugShowCheckedModeBanner: false,
-      title: 'Hồ sơ cá nhân',
-      home: const ProfileScreen(), // Đặt ProfileScreen làm màn hình chính
->>>>>>> origin/main
+      home: const ProfileScreen(),
+      debugShowMaterialGrid: false,
+      // title: 'Hồ sơ cá nhân',
     );
   }
 }
