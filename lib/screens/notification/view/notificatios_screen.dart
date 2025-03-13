@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:beestyle/components/buy_full_ui_kit.dart';
+import 'package:datnbeestyle/components/buy_full_ui_kit.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});

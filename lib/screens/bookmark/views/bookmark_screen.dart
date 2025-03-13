@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:beestyle/components/product/product_card.dart';
-import 'package:beestyle/models/product_model.dart';
-import 'package:beestyle/route/route_constants.dart';
+import 'package:datnbeestyle/components/product/product_card.dart';
+import 'package:datnbeestyle/models/product_model.dart';
+import 'package:datnbeestyle/route/route_constants.dart';
 
 import '../../../constants.dart';
 

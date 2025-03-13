@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:beestyle/constants.dart';
-import 'package:beestyle/models/category_model.dart';
-import 'package:beestyle/screens/search/views/components/search_form.dart';
+import 'package:datnbeestyle/constants.dart';
+import 'package:datnbeestyle/models/category_model.dart';
+import 'package:datnbeestyle/screens/search/views/components/search_form.dart';
 
 import 'components/expansion_category.dart';
 

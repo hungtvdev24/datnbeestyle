@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:beestyle/components/dot_indicators.dart';
-import 'package:beestyle/constants.dart';
-import 'package:beestyle/route/route_constants.dart';
+import 'package:datnbeestyle/components/dot_indicators.dart';
+import 'package:datnbeestyle/constants.dart';
+import 'package:datnbeestyle/route/route_constants.dart';
 
 import 'components/onbording_content.dart';
 
