@@ -1,3 +1,4 @@
+
 class AppNotification {
   final int id; // ID của user_notification
   final String title;
