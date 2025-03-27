@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/api/api_client.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/user_provider.dart';
 import '../main_screen.dart';
@@ -10,7 +9,7 @@ import '../order/checkout_screen.dart';
 import '../product/product_detail_screen.dart';
 
 class CartScreen extends StatefulWidget {
-  const CartScreen({Key? key}) : super(key: key);
+  const CartScreen({super.key});
 
   @override
   State<CartScreen> createState() => _CartScreenState();
@@ -52,13 +51,11 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
   Future<void> _loadCart() async {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-
     if (userProvider.token == null) {
       cartProvider.setCartItems([]);
       cartProvider.setErrorMessage('Vui lòng đăng nhập để xem giỏ hàng.');
       return;
     }
-
     try {
       await cartProvider.loadCart(userProvider.token!, context);
       debugPrint('Loaded cart items: ${cartProvider.cartItems}');
@@ -261,8 +258,6 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
     final String? name = product['name'];
     final double originalPrice = product['gia'] as double;
     final int soLuong = product['soLuong'] ?? 1;
-
-    // Tính discount (giả lập 20%)
     const double discountPercent = 20;
     final double discountedPrice = originalPrice * (1 - discountPercent / 100);
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -293,13 +288,11 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Checkbox chọn mục
             Checkbox(
               activeColor: Colors.green,
               value: product['selected'] ?? false,
               onChanged: (value) => _toggleSelect(index),
             ),
-            // Hình ảnh sản phẩm
             ClipRRect(
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
@@ -329,7 +322,6 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                 },
               ),
             ),
-            // Nội dung sản phẩm
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/api/api_client.dart';
 import '../../core/models/address.dart';
 import '../../providers/address_provider.dart';
 import '../../providers/checkout_provider.dart';
@@ -14,10 +13,10 @@ class CheckoutScreen extends StatefulWidget {
   final double totalPrice;
 
   const CheckoutScreen({
-    Key? key,
+    super.key,
     required this.selectedItems,
     required this.totalPrice,
-  }) : super(key: key);
+  });
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -136,18 +135,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               });
                             },
                             title: Text(
-                              addr.tenNguoiNhan ?? '',
+                              addr.tenNguoiNhan,
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "${addr.tenNha ?? ''}, ${addr.xa ?? ''}, ${addr.huyen ?? ''}, ${addr.tinh ?? ''}",
+                                  "${addr.tenNha}, ${addr.xa}, ${addr.huyen}, ${addr.tinh}",
                                   style: TextStyle(color: Colors.grey[700], fontSize: 14),
                                 ),
                                 Text(
-                                  "SDT: ${addr.sdtNhanHang ?? ''}",
+                                  "SDT: ${addr.sdtNhanHang}",
                                   style: TextStyle(color: Colors.grey[700], fontSize: 14),
                                 ),
                               ],
@@ -155,7 +154,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             activeColor: Colors.blue,
                             controlAffinity: ListTileControlAffinity.leading,
                           );
-                        }).toList(),
+                        }),
                         const SizedBox(height: 8),
                         SizedBox(
                           width: double.infinity,
@@ -263,7 +262,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

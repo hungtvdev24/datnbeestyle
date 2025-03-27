@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../core/api/api_client.dart';
 
 class ShareScreen extends StatelessWidget {
   final String? title;
