@@ -1,0 +1,2 @@
+D:/datnbeestyle/android/app/.cxx/Debug/1p51601t/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/datnbeestyle/android/app/.cxx/Debug/1p51601t/armeabi-v7a/CMakeFiles/rebuild_cache.dir
