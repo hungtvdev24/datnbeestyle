@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../../core/api/api_client.dart';
 
 class CategoryService {
