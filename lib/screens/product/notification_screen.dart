@@ -18,7 +18,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   void initState() {
     super.initState();
-    // Lấy token và tải thông báo khi khởi tạo màn hình
     final authService = AuthService();
     authService.getToken().then((token) {
       if (token != null) {
@@ -34,7 +33,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     if (_token == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     final notificationProvider = Provider.of<NotificationProvider>(context);
@@ -48,6 +50,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             color: Colors.black,
             fontSize: 20,
             fontWeight: FontWeight.bold,
+            fontFamily: 'Roboto',
           ),
         ),
         backgroundColor: Colors.white,
@@ -76,82 +79,151 @@ class _NotificationScreenState extends State<NotificationScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Lỗi: ${provider.error}'),
+                  Text(
+                    'Lỗi: ${provider.error}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontFamily: 'Roboto',
+                    ),
+                  ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () => provider.refreshNotifications(_token!),
-                    child: const Text("Thử lại"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        side: const BorderSide(color: Colors.black),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      "Thử lại",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
                   ),
                 ],
               ),
             );
           }
           if (provider.notifications.isEmpty) {
-            return const Center(child: Text('Chưa có thông báo nào.'));
+            return const Center(
+              child: Text(
+                'Chưa có thông báo nào.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontFamily: 'Roboto',
+                ),
+              ),
+            );
           }
 
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: provider.notifications.length,
-            separatorBuilder: (context, index) => const Divider(),
+            separatorBuilder: (context, index) => const Divider(
+              color: Colors.grey,
+              thickness: 0.5,
+            ),
             itemBuilder: (context, index) {
               final notification = provider.notifications[index];
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: notification.isRead
-                      ? Colors.grey.shade300
-                      : Colors.blue.shade100,
-                  child: Icon(
-                    Iconsax.notification,
-                    color: notification.isRead ? Colors.grey : Colors.blue,
-                  ),
-                ),
-                title: Text(
-                  notification.title,
-                  style: TextStyle(
-                    fontWeight:
-                    notification.isRead ? FontWeight.normal : FontWeight.bold,
-                  ),
-                ),
-                subtitle: Text(
-                  notification.content,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontWeight:
-                    notification.isRead ? FontWeight.normal : FontWeight.bold,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _formatTime(notification.createdAt),
-                      style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Iconsax.share, size: 20, color: Colors.grey),
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          AppRoutes.share,
-                          arguments: {
-                            'title': notification.title,
-                            'content': notification.content,
-                            'url': null,
-                          },
-                        );
-                      },
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 4),
+                decoration: BoxDecoration(
+                  color: notification.isRead ? Colors.white : const Color(0xFFFCE4EC),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 3,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                onTap: () async {
-                  if (!notification.isRead) {
-                    await provider.markAsRead(notification.id, _token!);
-                  }
-                },
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  leading: CircleAvatar(
+                    backgroundColor: notification.isRead
+                        ? Colors.grey.shade300
+                        : const Color(0xFFFCE4EC),
+                    child: Icon(
+                      Iconsax.notification,
+                      color: notification.isRead ? Colors.grey : Colors.pink,
+                    ),
+                  ),
+                  title: Text(
+                    notification.title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight:
+                      notification.isRead ? FontWeight.normal : FontWeight.bold,
+                      color: Colors.black,
+                      fontFamily: 'Roboto',
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      notification.content,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        fontWeight:
+                        notification.isRead ? FontWeight.normal : FontWeight.bold,
+                        fontFamily: 'Roboto',
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _formatTime(notification.createdAt),
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 12,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(
+                          Iconsax.share,
+                          size: 20,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.share,
+                            arguments: {
+                              'title': notification.title,
+                              'content': notification.content,
+                              'url': null,
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  onTap: () async {
+                    if (!notification.isRead) {
+                      await provider.markAsRead(notification.id, _token!);
+                    }
+                  },
+                ),
               );
             },
           );

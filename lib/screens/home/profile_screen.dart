@@ -19,10 +19,24 @@ class ProfileScreen extends StatelessWidget {
 
         if (userProvider.errorMessage != null || userProvider.userData == null) {
           return Scaffold(
+            backgroundColor: Colors.white,
             appBar: AppBar(
-              title: const Text("Hồ sơ của tôi"),
+              title: const Text(
+                "Hồ sơ của tôi",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                  fontFamily: 'Roboto',
+                ),
+              ),
+              backgroundColor: Colors.white,
+              elevation: 0,
               centerTitle: true,
-              backgroundColor: Colors.blueAccent,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
             body: Center(
               child: Column(
@@ -31,13 +45,35 @@ class ProfileScreen extends StatelessWidget {
                   Text(
                     userProvider.errorMessage?['general']?.toString() ??
                         "Không thể tải thông tin người dùng",
-                    style: const TextStyle(color: Colors.red, fontSize: 16),
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 16,
+                      fontFamily: 'Roboto',
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () => userProvider.fetchUserData(),
-                    child: const Text("Thử lại"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        side: const BorderSide(color: Colors.black),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      "Thử lại",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -48,13 +84,13 @@ class ProfileScreen extends StatelessWidget {
         final userData = userProvider.userData!;
 
         return Scaffold(
-          backgroundColor: Colors.grey[100],
+          backgroundColor: Colors.white,
           body: SafeArea(
             child: SingleChildScrollView(
               child: Column(
                 children: [
                   _buildProfileHeader(context, userData),
-                  _buildPlanCard(),
+                  _buildAppIntroduction(),
                   _buildVoucherSection(),
                   _buildSectionTitle("Tài khoản"),
                   _buildProfileOptions(context),
@@ -77,19 +113,12 @@ class ProfileScreen extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.only(
+      decoration: const BoxDecoration(
+        color: Color(0xFFFCE4EC),
+        borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
       ),
       child: Row(
         children: [
@@ -99,7 +128,7 @@ class ProfileScreen extends StatelessWidget {
               width: 64,
               height: 64,
               child: Image.asset(
-                "assets/avatar.png",
+                "assets/login_header.png",
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: Colors.grey[300],
@@ -123,6 +152,8 @@ class ProfileScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Roboto',
+                      color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -131,6 +162,7 @@ class ProfileScreen extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 14,
+                      fontFamily: 'Roboto',
                     ),
                   ),
                 ],
@@ -142,17 +174,20 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPlanCard() {
+  Widget _buildAppIntroduction() {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7F00FF), Color(0xFFAE52BB)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -161,46 +196,64 @@ class ProfileScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Starter Plan",
+                  "Giới thiệu app",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Roboto',
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  "All features unlocked!",
+                Text(
+                  "Khám phá ứng dụng của chúng tôi!",
                   style: TextStyle(
-                    color: Colors.white70,
+                    color: Colors.grey[600],
                     fontSize: 14,
+                    fontFamily: 'Roboto',
                   ),
                 ),
                 const SizedBox(height: 12),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    foregroundColor: Colors.purple,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(24),
+                      side: const BorderSide(color: Colors.black),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: () {
+                    // Điều hướng hoặc hiển thị thông tin giới thiệu app
+                  },
+                  child: const Text(
+                    "Tìm hiểu thêm",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                      fontFamily: 'Roboto',
                     ),
                   ),
-                  onPressed: () {},
-                  child: const Text("Upgrade"),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 16),
-          Image.asset(
-            "assets/upgrade_illustration.png",
-            width: 60,
-            height: 60,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => const Icon(
-              Icons.auto_awesome,
-              color: Colors.white,
-              size: 50,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              "assets/images/anh6.png",
+              width: 60,
+              height: 60,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => const Icon(
+                Icons.info,
+                color: Colors.grey,
+                size: 50,
+              ),
             ),
           ),
         ],
@@ -213,7 +266,7 @@ class ProfileScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.orangeAccent,
+        color: const Color(0xFFFCE4EC),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -229,21 +282,33 @@ class ProfileScreen extends StatelessWidget {
           const Text(
             "🎉 Bạn có 3 voucher!",
             style: TextStyle(
-              color: Colors.white,
+              color: Colors.black,
               fontSize: 16,
               fontWeight: FontWeight.bold,
+              fontFamily: 'Roboto',
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
-              foregroundColor: Colors.orange,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(24),
+                side: const BorderSide(color: Colors.black),
               ),
+              elevation: 0,
             ),
             onPressed: () {},
-            child: const Text("Xem ngay"),
+            child: const Text(
+              "Xem ngay",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+                fontFamily: 'Roboto',
+              ),
+            ),
           ),
         ],
       ),
@@ -260,6 +325,7 @@ class ProfileScreen extends StatelessWidget {
           fontSize: 16,
           fontWeight: FontWeight.bold,
           color: Colors.black87,
+          fontFamily: 'Roboto',
         ),
       ),
     );
@@ -281,8 +347,8 @@ class ProfileScreen extends StatelessWidget {
               () {},
         ),
         _buildProfileOption(
-          Icons.favorite,
-          "Sản phẩm yêu thích",
+          Icons.info,
+          "Giới thiệu app",
               () {},
         ),
         _buildProfileOption(
@@ -321,8 +387,11 @@ class ProfileScreen extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        leading: Icon(icon, color: Colors.blueAccent),
-        title: Text(title, style: const TextStyle(fontSize: 15)),
+        leading: Icon(icon, color: Colors.grey),
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 15, fontFamily: 'Roboto'),
+        ),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
         onTap: onTap,
       ),
@@ -333,7 +402,6 @@ class ProfileScreen extends StatelessWidget {
     return Consumer<RecentProductsProvider>(
       builder: (context, recentProductsProvider, child) {
         final recentProducts = recentProductsProvider.recentProducts;
-        // Chỉ lấy tối đa 4 sản phẩm
         final displayedProducts = recentProducts.length > 4 ? recentProducts.sublist(0, 4) : recentProducts;
 
         return Container(
@@ -358,7 +426,11 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   const Text(
                     "Lịch sử xem gần đây",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Roboto',
+                    ),
                   ),
                   if (recentProducts.isNotEmpty)
                     TextButton(
@@ -367,7 +439,10 @@ class ProfileScreen extends StatelessWidget {
                       },
                       child: const Text(
                         "Xóa lịch sử",
-                        style: TextStyle(color: Colors.redAccent),
+                        style: TextStyle(
+                          color: Colors.redAccent,
+                          fontFamily: 'Roboto',
+                        ),
                       ),
                     ),
                 ],
@@ -377,7 +452,10 @@ class ProfileScreen extends StatelessWidget {
                   ? const Center(
                 child: Text(
                   "Bạn chưa xem sản phẩm nào.",
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontFamily: 'Roboto',
+                  ),
                 ),
               )
                   : Column(
@@ -395,10 +473,16 @@ class ProfileScreen extends StatelessWidget {
                         const Icon(Icons.error),
                       ),
                     ),
-                    title: Text(product.name),
+                    title: Text(
+                      product.name,
+                      style: const TextStyle(fontFamily: 'Roboto'),
+                    ),
                     subtitle: Text(
                       "${product.price.toStringAsFixed(0)} VNĐ",
-                      style: const TextStyle(color: Colors.grey),
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontFamily: 'Roboto',
+                      ),
                     ),
                     trailing: const Icon(
                       Icons.arrow_forward_ios,
@@ -406,7 +490,6 @@ class ProfileScreen extends StatelessWidget {
                       color: Colors.grey,
                     ),
                     onTap: () {
-                      // Điều hướng đến màn hình chi tiết sản phẩm
                       Navigator.pushNamed(
                         context,
                         AppRoutes.productDetail,
@@ -415,27 +498,29 @@ class ProfileScreen extends StatelessWidget {
                           'tenSanPham': product.name,
                           'urlHinhAnh': product.image,
                           'gia': product.price,
-                          'thuongHieu': "Thương hiệu", // Thêm thông tin nếu cần
-                          'moTa': "Mô tả sản phẩm", // Thêm thông tin nếu cần
-                          'soSaoDanhGia': 4.5, // Thêm thông tin nếu cần
-                          'id_danhMuc': 1, // Thêm thông tin nếu cần
+                          'thuongHieu': "Thương hiệu",
+                          'moTa': "Mô tả sản phẩm",
+                          'soSaoDanhGia': 4.5,
+                          'id_danhMuc': 1,
                         },
                       );
                     },
                   );
                 }).toList(),
               ),
-              if (recentProducts.length > 4) // Hiển thị nút "All" nếu có hơn 4 sản phẩm
+              if (recentProducts.length > 4)
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      // Điều hướng đến màn hình lịch sử đầy đủ
                       Navigator.pushNamed(context, AppRoutes.recentHistory);
                     },
                     child: const Text(
                       "All",
-                      style: TextStyle(color: Colors.blueAccent),
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontFamily: 'Roboto',
+                      ),
                     ),
                   ),
                 ),
@@ -446,21 +531,149 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  Future<bool?> _showLogoutConfirmationDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Colors.white,
+        contentPadding: const EdgeInsets.all(0),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFCE4EC),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.logout,
+                    color: Colors.black,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    "Xác nhận đăng xuất",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.black,
+                      fontFamily: 'Roboto',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+              child: const Text(
+                "Bạn có chắc chắn muốn đăng xuất khỏi tài khoản của mình không?",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                  fontFamily: 'Roboto',
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          side: const BorderSide(color: Colors.black),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        "Hủy",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          side: const BorderSide(color: Colors.black),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        "Xác nhận",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildLogoutButton(BuildContext context, UserProvider userProvider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
           minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: const BorderSide(color: Colors.black),
+          ),
+          elevation: 0,
         ),
-        onPressed: () {
-          userProvider.logout(context);
+        onPressed: () async {
+          final bool? confirm = await _showLogoutConfirmationDialog(context);
+          if (confirm == true) {
+            userProvider.logout(context);
+          }
         },
         child: const Text(
           "Đăng xuất",
-          style: TextStyle(fontSize: 16, color: Colors.white),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+            fontFamily: 'Roboto',
+          ),
         ),
       ),
     );

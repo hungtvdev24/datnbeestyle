@@ -20,12 +20,9 @@ dependencies:
   fake_async: ^1.3.1
   leak_tracker: ^10.0.5
   material_color_utilities: ^0.11.1
-  vm_service: ^14.3.0
+
   iconsax: ^0.0.8
   cupertino_icons: ^1.0.8
-
-
-
 
 dev_dependencies:
   flutter_test:
@@ -48,7 +45,8 @@ flutter:
     - assets/images/spl3.jpg
     - assets/images/spl4.jpg
     - assets/icons/
+
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/images/anh6.png"  # Đường dẫn tới file icon gốc của bạn
+  image_path: "assets/images/anh6.png"

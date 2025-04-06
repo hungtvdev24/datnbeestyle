@@ -2,13 +2,14 @@ import 'dart:convert';
 import '../../core/api/api_client.dart';
 
 class ProductService {
+
   static const String popularEndpoint = 'products/popular-public';
   static const String searchEndpoint = 'search';
 
-  // Lấy danh sách sản phẩm phổ biến
+  // Lấy danh sách sản phẩm phổ biến (công khai, không cần token)
   Future<List<dynamic>> fetchProducts() async {
     try {
-      final response = await ApiClient.getData(popularEndpoint);
+      final response = await ApiClient.getData(popularEndpoint, token: null);
       print('Raw Response from ProductService (fetchProducts): $response');
 
       if (response is List) {
@@ -30,10 +31,10 @@ class ProductService {
     }
   }
 
-  // Tìm kiếm sản phẩm theo query
+  // Tìm kiếm sản phẩm theo query (công khai, không cần token)
   Future<List<dynamic>> searchProducts(String query) async {
     try {
-      final response = await ApiClient.getData('$searchEndpoint?query=$query');
+      final response = await ApiClient.getData('$searchEndpoint?query=$query', token: null);
       print('Raw Response from ProductService (searchProducts): $response');
 
       if (response is Map && response.containsKey('products')) {
@@ -52,10 +53,10 @@ class ProductService {
     }
   }
 
-  // Lấy danh sách đánh giá của sản phẩm
+  // Lấy danh sách đánh giá của sản phẩm (công khai, không cần token)
   Future<List<dynamic>> fetchReviews(int productId) async {
     try {
-      final response = await ApiClient.getData('products/$productId/reviews');
+      final response = await ApiClient.getData('products/$productId/reviews', token: null);
       print('Raw Response from ProductService (fetchReviews): $response');
 
       if (response is Map && response.containsKey('reviews')) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Thêm import này nếu muốn format tiền tệ
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../providers/product_provider.dart';
 import '../product/product_detail_screen.dart';
@@ -24,19 +24,66 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     provider.errorMessage!,
-                    style: const TextStyle(color: Colors.red, fontSize: 16),
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 16,
+                      fontFamily: 'Roboto',
+                    ),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () => provider.refreshProducts(),
-                    child: const Text("Thử lại"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        side: const BorderSide(color: Colors.black),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      "Thử lại",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
                   ),
                 ],
               ),
             );
           }
 
-          // Nếu có products, hiển thị giao diện
+          if (provider.products.isEmpty) {
+            print("Products is empty");
+            return const Center(
+              child: SizedBox(
+                height: 200,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.info, size: 50, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      "Không có sản phẩm nào để hiển thị",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          print("Products: ${provider.products}");
+
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,39 +92,35 @@ class HomeScreen extends StatelessWidget {
                 _buildBanner(
                   title: "BLACK FRIDAY\nBỘ SƯU TẬP",
                   discountText: "GIẢM 50%",
-                  imageUrl: "https://via.placeholder.com/400x200.png?text=Black+Friday",
+                  imageUrl: "assets/anh11.png",
                 ),
                 const SizedBox(height: 16),
 
-                // 2. Danh mục
-                // _buildCategoryButtons(context),
-                // const SizedBox(height: 16),
-
-                // 3. Khối sản phẩm 1
+                // 2. Sản phẩm phổ biến (lướt ngang)
                 _buildProductSection("Sản phẩm phổ biến", provider.products, context),
                 const SizedBox(height: 20),
 
-                // 4. Banner 2
+                // 3. Banner 2
                 _buildBanner(
                   title: "FS - MÙA MỚI",
                   discountText: "GIẢM 30%",
-                  imageUrl: "https://via.placeholder.com/400x200.png?text=New+Season",
+                  imageUrl: "assets/anh14.png",
                 ),
                 const SizedBox(height: 16),
 
-                // 5. Banner 3
+                // 4. Banner 3
                 _buildBanner(
                   title: "BỘ SƯU TẬP MÙA XUÂN",
                   discountText: "GIẢM 20%",
-                  imageUrl: "https://via.placeholder.com/400x200.png?text=Spring+Sale",
+                  imageUrl: "assets/anh17.png",
                 ),
                 const SizedBox(height: 16),
 
-                // 6. Khối sản phẩm 2
+                // 5. Hàng mới về (lướt ngang)
                 _buildProductSection("Hàng mới về", provider.products, context),
                 const SizedBox(height: 20),
 
-                // 7. Khối sản phẩm 3
+                // 6. Sản phẩm nổi bật (lướt ngang)
                 _buildProductSection("Sản phẩm nổi bật", provider.products, context),
                 const SizedBox(height: 20),
               ],
@@ -104,7 +147,7 @@ class HomeScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.black.withOpacity(0.8),
             image: DecorationImage(
-              image: NetworkImage(imageUrl),
+              image: AssetImage(imageUrl),
               fit: BoxFit.cover,
               colorFilter: const ColorFilter.mode(
                 Colors.black54,
@@ -124,6 +167,7 @@ class HomeScreen extends StatelessWidget {
                     color: Colors.white,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Roboto',
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -136,6 +180,7 @@ class HomeScreen extends StatelessWidget {
                       color: Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Roboto',
                     ),
                   ),
                 ),
@@ -143,31 +188,24 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ),
-        // Nút điều hướng (Next)
         Positioned(
           right: 16,
           top: 0,
           bottom: 0,
           child: IconButton(
             icon: const Icon(Icons.arrow_forward, color: Colors.white),
-            onPressed: () {
-              // Logic cho nút Next (nếu cần)
-            },
+            onPressed: () {},
           ),
         ),
-        // Nút điều hướng (Previous)
         Positioned(
           left: 16,
           top: 0,
           bottom: 0,
           child: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              // Logic cho nút Previous (nếu cần)
-            },
+            onPressed: () {},
           ),
         ),
-        // Dots indicator (ví dụ 3 dots)
         Positioned(
           bottom: 10,
           left: 0,
@@ -192,94 +230,43 @@ class HomeScreen extends StatelessWidget {
   }
 
   // --------------------------------------------------------------------------
-  //  DANH MỤC
-  // --------------------------------------------------------------------------
-  // Widget _buildCategoryButtons(BuildContext context) {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: 16),
-  //     child: Row(
-  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //       children: [
-  //         ElevatedButton(
-  //           onPressed: () {
-  //             // Logic cho nút "Tất cả danh mục"
-  //           },
-  //           style: ElevatedButton.styleFrom(
-  //             backgroundColor: const Color(0xFF6200EE), // Màu tím
-  //             shape: RoundedRectangleBorder(
-  //               borderRadius: BorderRadius.circular(20),
-  //             ),
-  //             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-  //           ),
-  //           child: const Row(
-  //             children: [
-  //               Icon(Icons.category, size: 20, color: Colors.white),
-  //               SizedBox(width: 8),
-  //               Text(
-  //                 "Tất cả danh mục",
-  //                 style: TextStyle(color: Colors.white, fontSize: 14),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //         OutlinedButton(
-  //           onPressed: () {
-  //             // Logic cho nút "Khuyến mãi"
-  //           },
-  //           style: OutlinedButton.styleFrom(
-  //             side: BorderSide(color: Colors.grey),
-  //             shape: RoundedRectangleBorder(
-  //               borderRadius: BorderRadius.circular(20),
-  //             ),
-  //             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-  //           ),
-  //           child: const Row(
-  //             children: [
-  //               Icon(Icons.local_offer, size: 20, color: Colors.black54),
-  //               SizedBox(width: 8),
-  //               Text(
-  //                 "Khuyến mãi",
-  //                 style: TextStyle(color: Colors.black54, fontSize: 14),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //         OutlinedButton(
-  //           onPressed: () {
-  //             // Logic cho nút "Nam"
-  //           },
-  //           style: OutlinedButton.styleFrom(
-  //             side: BorderSide(color: Colors.grey),
-  //             shape: RoundedRectangleBorder(
-  //               borderRadius: BorderRadius.circular(20),
-  //             ),
-  //             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-  //           ),
-  //           child: const Row(
-  //             children: [
-  //               Icon(Icons.person, size: 20, color: Colors.black54),
-  //               SizedBox(width: 8),
-  //               Text(
-  //                 "Nam",
-  //                 style: TextStyle(color: Colors.black54, fontSize: 14),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // --------------------------------------------------------------------------
-  //  KHỐI SẢN PHẨM
+  //  KHỐI SẢN PHẨM (LƯỚT NGANG)
   // --------------------------------------------------------------------------
   Widget _buildProductSection(String title, List<dynamic> products, BuildContext context) {
     if (products.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Text("Không có sản phẩm nào cho \"$title\""),
+        child: SizedBox(
+          height: 220,
+          child: Center(
+            child: Text(
+              "Không có sản phẩm nào cho \"$title\"",
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+                fontFamily: 'Roboto',
+              ),
+            ),
+          ),
+        ),
       );
+    }
+
+    List<Widget> productWidgets = [];
+    for (var product in products) {
+      try {
+        productWidgets.add(_buildProductCard(product, context));
+      } catch (e) {
+        print("Error rendering product: $e");
+        productWidgets.add(
+          Container(
+            width: 150,
+            height: 220,
+            margin: const EdgeInsets.only(right: 16),
+            child: const Center(child: Text("Lỗi hiển thị sản phẩm")),
+          ),
+        );
+      }
     }
 
     return Padding(
@@ -293,17 +280,15 @@ class HomeScreen extends StatelessWidget {
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
+              fontFamily: 'Roboto',
             ),
           ),
           const SizedBox(height: 10),
           SizedBox(
             height: 220,
-            child: ListView.builder(
+            child: ListView(
               scrollDirection: Axis.horizontal,
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                return _buildProductCard(products[index], context);
-              },
+              children: productWidgets,
             ),
           ),
         ],
@@ -315,47 +300,67 @@ class HomeScreen extends StatelessWidget {
   //  CARD SẢN PHẨM
   // --------------------------------------------------------------------------
   Widget _buildProductCard(dynamic product, BuildContext context) {
-    // Tạo format tiền Việt
     final formatCurrency = NumberFormat("#,###", "vi_VN");
 
-    // Lấy dữ liệu
-    final imageUrl = product['urlHinhAnh'] ?? "http://10.0.3.2:8001/images/default.png";
-    final thuongHieu = product['thuongHieu'] ?? "Không có thương hiệu";
-    final tenSanPham = product['tenSanPham'] ?? "Không có tên";
-    final double originalPrice = double.tryParse(product['gia'].toString()) ?? 0.0;
+    String imageUrl = "https://picsum.photos/400/200";
+    try {
+      if (product['variations'] != null &&
+          product['variations'].isNotEmpty &&
+          product['variations'][0]['images'] != null &&
+          product['variations'][0]['images'].isNotEmpty &&
+          product['variations'][0]['images'][0]['image_url'] != null) {
+        imageUrl = product['variations'][0]['images'][0]['image_url'].toString();
+      }
+    } catch (e) {
+      print("Error accessing image URL: $e");
+    }
 
-    // Giả lập giảm giá
-    const bool hasDiscount = true; // tuỳ logic
-    const double discountPercent = 20; // tuỳ logic
-    final double discountedPrice = originalPrice * (1 - discountPercent / 100);
-
-    // Chuyển sang chuỗi có đơn vị tiền tệ
-    final discountedPriceText = "${formatCurrency.format(discountedPrice)} ₫";
-    final originalPriceText = "${formatCurrency.format(originalPrice)} ₫";
+    final thuongHieu = product['thuongHieu']?.toString() ?? "Không có thương hiệu";
+    final tenSanPham = product['tenSanPham']?.toString() ?? "Không có tên";
+    final double price = double.tryParse(product['gia']?.toString() ?? '0') ?? 0.0;
+    final priceText = "${formatCurrency.format(price)} VNĐ";
+    final avgRating = double.tryParse(product['soSaoDanhGia']?.toString() ?? '0') ?? 0.0;
 
     return GestureDetector(
       onTap: () {
-        // Chuyển sang màn hình chi tiết
+        final productDetail = {
+          'urlHinhAnh': imageUrl,
+          'thuongHieu': thuongHieu,
+          'tenSanPham': tenSanPham,
+          'gia': price,
+          'id_sanPham': product['id_sanPham'],
+          'id_danhMuc': product['id_danhMuc'],
+          'moTa': product['moTa']?.toString() ?? "Không có mô tả",
+          'soSaoDanhGia': avgRating,
+          'variations': product['variations'] ?? [],
+        };
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(product: product),
+            builder: (context) => ProductDetailScreen(product: productDetail),
           ),
         );
       },
       child: Container(
         width: 150,
         margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.black.withOpacity(0.2), // Viền đen mỏng, hơi nhạt
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(12), // Bo góc
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Ảnh + tag giảm giá
+            // Ảnh
             Stack(
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    topRight: Radius.circular(8),
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
                   ),
                   child: Image.network(
                     imageUrl,
@@ -363,6 +368,7 @@ class HomeScreen extends StatelessWidget {
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
+                      print("Error loading image for $tenSanPham: $error");
                       return Container(
                         height: 120,
                         color: Colors.grey[300],
@@ -372,33 +378,33 @@ class HomeScreen extends StatelessWidget {
                     },
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
-                      return SizedBox(
+                      return const SizedBox(
                         height: 120,
                         child: Center(child: CircularProgressIndicator()),
                       );
                     },
                   ),
                 ),
-                if (hasDiscount)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        "$discountPercent% GIẢM",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFCE4EC), // Màu hồng nhạt
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      "Like",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Roboto',
                       ),
                     ),
                   ),
+                ),
               ],
             ),
 
@@ -406,15 +412,16 @@ class HomeScreen extends StatelessWidget {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(12),
+                    bottomRight: Radius.circular(12),
                   ),
                   color: Colors.white,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min, // Đảm bảo Column không chiếm không gian thừa
                   children: [
                     // Thương hiệu
                     Text(
@@ -423,56 +430,53 @@ class HomeScreen extends StatelessWidget {
                         fontSize: 12,
                         color: Colors.grey,
                         fontWeight: FontWeight.w500,
+                        fontFamily: 'Roboto',
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2), // Giảm khoảng cách
 
                     // Tên sản phẩm
+                    Expanded(
+                      child: Text(
+                        tenSanPham,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          fontFamily: 'Roboto',
+                        ),
+                        maxLines: 2, // Giới hạn tối đa 2 dòng
+                        overflow: TextOverflow.ellipsis, // Cắt bớt nếu quá dài
+                      ),
+                    ),
+                    const SizedBox(height: 2), // Giảm khoảng cách
+
+                    // Đánh giá sao
+                    Row(
+                      children: List.generate(
+                        5,
+                            (index) => Icon(
+                          index < avgRating ? Icons.star : Icons.star_border,
+                          color: Colors.yellow,
+                          size: 14, // Giảm kích thước sao để tiết kiệm không gian
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 2), // Giảm khoảng cách
+
+                    // Giá
                     Text(
-                      tenSanPham,
+                      priceText,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
+                        fontFamily: 'Roboto',
                       ),
-                      maxLines: 2,
+                      maxLines: 1, // Đảm bảo giá chỉ chiếm 1 dòng
                       overflow: TextOverflow.ellipsis,
-                    ),
-                    const Spacer(),
-
-                    // Giá
-                    Row(
-                      children: [
-                        // Giá đã giảm
-                        Flexible(
-                          child: Text(
-                            discountedPriceText,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (hasDiscount) ...[
-                          const SizedBox(width: 6),
-                          // Giá gốc gạch ngang
-                          Flexible(
-                            child: Text(
-                              originalPriceText,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ],
                     ),
                   ],
                 ),
