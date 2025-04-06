@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../../core/api/category_service.dart';
 
 class CategoryProvider extends ChangeNotifier {
   final CategoryService _categoryService = CategoryService();
 
-  List<dynamic> _categories = []; // Danh sách danh mục
-  bool _isLoading = false; // Trạng thái tải
-  String? _errorMessage; // Thông báo lỗi
-  bool _hasError = false; // Trạng thái có lỗi
+  List<dynamic> _categories = [];
+  bool _isLoading = false;
+  String? _errorMessage;
+  bool _hasError = false;
 
   List<dynamic> get categories => _categories;
   bool get isLoading => _isLoading;
@@ -18,7 +18,6 @@ class CategoryProvider extends ChangeNotifier {
     loadCategories();
   }
 
-  // Tải danh sách danh mục
   Future<void> loadCategories() async {
     if (_isLoading) return;
 
@@ -45,7 +44,6 @@ class CategoryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Làm mới danh sách danh mục
   Future<void> refreshCategories() async {
     await loadCategories();
   }

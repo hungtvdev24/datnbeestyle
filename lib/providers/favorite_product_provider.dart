@@ -33,7 +33,12 @@ class FavoriteProductProvider extends ChangeNotifier {
       final data = await FavoriteProductService.getFavoriteProducts(token);
       setFavorites(List<Map<String, dynamic>>.from(data));
     } catch (e) {
-      setErrorMessage(e.toString());
+      final error = e.toString();
+      if (error.contains('404')) {
+        setErrorMessage('404'); // Dùng để hiển thị "Chưa có sản phẩm nào"
+      } else {
+        setErrorMessage('Không thể tải sản phẩm yêu thích: $error');
+      }
     } finally {
       setLoading(false);
     }
@@ -45,10 +50,9 @@ class FavoriteProductProvider extends ChangeNotifier {
     setErrorMessage(null);
     try {
       await FavoriteProductService.addFavoriteProduct(token, productId);
-      // Sau khi thêm, tải lại danh sách
-      await loadFavoriteProducts(token);
+      await loadFavoriteProducts(token); // Tải lại danh sách sau khi thêm
     } catch (e) {
-      setErrorMessage(e.toString());
+      setErrorMessage('Không thể thêm sản phẩm yêu thích: $e');
     } finally {
       setLoading(false);
     }
@@ -60,9 +64,9 @@ class FavoriteProductProvider extends ChangeNotifier {
     setErrorMessage(null);
     try {
       await FavoriteProductService.removeFavoriteProduct(token, productId);
-      await loadFavoriteProducts(token);
+      await loadFavoriteProducts(token); // Tải lại danh sách sau khi xóa
     } catch (e) {
-      setErrorMessage(e.toString());
+      setErrorMessage('Không thể xóa sản phẩm yêu thích: $e');
     } finally {
       setLoading(false);
     }
