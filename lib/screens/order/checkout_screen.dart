@@ -273,12 +273,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        "Bảo vệ sản phẩm được bảo hiểm khi thiết hại xảy ra do sự bất ngờ, tiếp xúc với chất lỏng hoặc hư hỏng trong quá trình sử dụng.",
+                                        "Biến thể: ${item['color'] ?? ''} - ${item['size'] ?? ''}",
                                         style: TextStyle(
                                             color: Colors.grey[700],
                                             fontSize: 12),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 4),
                                       Row(
@@ -286,7 +284,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            "${formatCurrency.format(double.tryParse(item['giaTien'].toString()) ?? 0)} ₫",
+                                            "${formatCurrency.format(double.tryParse(item['gia'].toString()) ?? 0)} ₫",
                                             style: const TextStyle(
                                                 fontSize: 14,
                                                 color: Colors.black,
@@ -310,6 +308,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ],
                     ),
                   ),
+
                   Container(
                     color: Colors.white,
                     padding: const EdgeInsets.all(16.0),
@@ -339,6 +338,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ],
                     ),
                   ),
+
                   Container(
                     color: Colors.white,
                     padding: const EdgeInsets.all(16.0),
@@ -377,6 +377,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ],
                     ),
                   ),
+
                   Container(
                     color: Colors.white,
                     padding: const EdgeInsets.all(16.0),
@@ -410,7 +411,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   TextStyle(fontSize: 14, color: Colors.grey),
                             ),
                             Text(
-                              "${formatCurrency.format(widget.totalPrice * 0.1)} ₫", // Giả định tiết kiệm 10%
+                              "${formatCurrency.format(widget.totalPrice * 0.1)} ₫",
                               style: const TextStyle(
                                   fontSize: 14, color: Colors.grey),
                             ),
@@ -419,6 +420,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ],
                     ),
                   ),
+
                   Container(
                     color: Colors.white,
                     padding: const EdgeInsets.all(16.0),
@@ -448,7 +450,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             token: token,
                             idDiaChi: selectedAddress!.idDiaChi,
                             phuongThucThanhToan: paymentMethod,
-                            selectedItems: widget.selectedItems,
+                            selectedItems: widget.selectedItems.map((item) {
+                              return {
+                                'id_mucGioHang': item['id_mucGioHang'],
+                                'id_sanPham': item['id_sanPham'],
+                                'variation_id': item['variation_id'],
+                                'soLuong': item['soLuong'],
+                              };
+                            }).toList(),
                             message: _messageController.text,
                           );
 
