@@ -47,7 +47,27 @@ class ProductProvider extends ChangeNotifier {
 
     try {
       final fetchedProducts = await _productService.fetchProducts();
-      _products = fetchedProducts;
+      _products = fetchedProducts.map((product) {
+        // Đảm bảo rằng sản phẩm có variations, nếu không thì thêm một variations mặc định
+        if (product['variations'] == null || product['variations'].isEmpty) {
+          return {
+            ...product,
+            'variations': [
+              {
+                'id': null,
+                'color': 'Mặc định',
+                'size': null,
+                'price': product['gia'] ?? 0.0,
+                'stock': 0,
+                'images': [
+                  {'image_url': 'https://picsum.photos/400/200'} // Hình ảnh mặc định
+                ]
+              }
+            ]
+          };
+        }
+        return product;
+      }).toList();
       if (_products.isEmpty) {
         _errorMessage = "Không có sản phẩm nào được tìm thấy.";
       }
@@ -106,7 +126,27 @@ class ProductProvider extends ChangeNotifier {
 
     try {
       final results = await _productService.searchProducts(query);
-      _searchResults = results;
+      _searchResults = results.map((product) {
+        // Đảm bảo rằng sản phẩm có variations, nếu không thì thêm một variations mặc định
+        if (product['variations'] == null || product['variations'].isEmpty) {
+          return {
+            ...product,
+            'variations': [
+              {
+                'id': null,
+                'color': 'Mặc định',
+                'size': null,
+                'price': product['gia'] ?? 0.0,
+                'stock': 0,
+                'images': [
+                  {'image_url': 'https://picsum.photos/400/200'} // Hình ảnh mặc định
+                ]
+              }
+            ]
+          };
+        }
+        return product;
+      }).toList();
       if (_searchResults.isEmpty) {
         _searchErrorMessage = "Không tìm thấy sản phẩm nào.";
       }
@@ -131,6 +171,27 @@ class ProductProvider extends ChangeNotifier {
     try {
       final allProducts = await _productService.fetchProducts();
       _suggestedProducts = allProducts.where((prod) => prod['id_danhMuc'] == categoryId).toList();
+      _suggestedProducts = _suggestedProducts.map((product) {
+        // Đảm bảo rằng sản phẩm có variations, nếu không thì thêm một variations mặc định
+        if (product['variations'] == null || product['variations'].isEmpty) {
+          return {
+            ...product,
+            'variations': [
+              {
+                'id': null,
+                'color': 'Mặc định',
+                'size': null,
+                'price': product['gia'] ?? 0.0,
+                'stock': 0,
+                'images': [
+                  {'image_url': 'https://picsum.photos/400/200'} // Hình ảnh mặc định
+                ]
+              }
+            ]
+          };
+        }
+        return product;
+      }).toList();
       if (_suggestedProducts.isEmpty) {
         _errorMessage = "Không có sản phẩm gợi ý nào.";
       }
