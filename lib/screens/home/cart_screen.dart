@@ -66,8 +66,10 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
 
   void _toggleSelect(int index) {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
-    final updatedItems = List<Map<String, dynamic>>.from(cartProvider.cartItems);
-    updatedItems[index]['selected'] = !(updatedItems[index]['selected'] ?? false);
+    final updatedItems =
+        List<Map<String, dynamic>>.from(cartProvider.cartItems);
+    updatedItems[index]['selected'] =
+        !(updatedItems[index]['selected'] ?? false);
     cartProvider.setCartItems(updatedItems);
   }
 
@@ -75,19 +77,20 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (userProvider.token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vui lòng đăng nhập để cập nhật giỏ hàng!')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Vui lòng đăng nhập để cập nhật giỏ hàng!')));
       return;
     }
-    final updatedItems = List<Map<String, dynamic>>.from(cartProvider.cartItems);
+    final updatedItems =
+        List<Map<String, dynamic>>.from(cartProvider.cartItems);
     int currentQty = updatedItems[index]['soLuong'] ?? 1;
     int newQty = currentQty + change;
     if (newQty < 1) return;
     updatedItems[index]['soLuong'] = newQty;
     cartProvider.setCartItems(updatedItems);
     try {
-      await cartProvider.updateCartItemQuantity(
-          userProvider.token!, updatedItems[index]['id_mucGioHang'], newQty, context);
+      await cartProvider.updateCartItemQuantity(userProvider.token!,
+          updatedItems[index]['id_mucGioHang'], newQty, context);
       await _loadCart();
     } catch (e) {
       updatedItems[index]['soLuong'] = currentQty;
@@ -105,10 +108,12 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
           const SnackBar(content: Text('Vui lòng đăng nhập để xóa mục!')));
       return;
     }
-    final selectedItems = cartProvider.cartItems.where((item) => item['selected'] == true).toList();
+    final selectedItems = cartProvider.cartItems
+        .where((item) => item['selected'] == true)
+        .toList();
     if (selectedItems.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vui lòng chọn ít nhất một mục để xóa!')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Vui lòng chọn ít nhất một mục để xóa!')));
       return;
     }
     final bool? confirm = await showDialog<bool>(
@@ -133,10 +138,11 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
     if (confirm == true) {
       for (var item in selectedItems) {
         try {
-          await cartProvider.removeCartItem(userProvider.token!, item['id_mucGioHang'], context);
+          await cartProvider.removeCartItem(
+              userProvider.token!, item['id_mucGioHang'], context);
         } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Lỗi khi xóa mục: $e')));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('Lỗi khi xóa mục: $e')));
           await _loadCart();
           return;
         }
@@ -164,44 +170,49 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                   child: cartProvider.isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : cartProvider.errorMessage != null
-                      ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        cartProvider.errorMessage!,
-                        style: const TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  )
-                      : cartProvider.cartItems.isEmpty
-                      ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text(
-                        'Giỏ hàng trống',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                    ),
-                  )
-                      : SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        _buildHeader(),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          padding: const EdgeInsets.all(8),
-                          itemCount: cartProvider.cartItems.length,
-                          itemBuilder: (context, index) {
-                            return _buildCartItem(
-                                cartProvider.cartItems[index], index, context);
-                          },
-                        ),
-                        _buildCouponSection(),
-                      ],
-                    ),
-                  ),
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(
+                                  cartProvider.errorMessage!,
+                                  style: const TextStyle(color: Colors.red),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            )
+                          : cartProvider.cartItems.isEmpty
+                              ? const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Text(
+                                      'Giỏ hàng trống',
+                                      style: TextStyle(
+                                          fontSize: 18, color: Colors.grey),
+                                    ),
+                                  ),
+                                )
+                              : SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      _buildHeader(),
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        padding: const EdgeInsets.all(8),
+                                        itemCount:
+                                            cartProvider.cartItems.length,
+                                        itemBuilder: (context, index) {
+                                          return _buildCartItem(
+                                              cartProvider.cartItems[index],
+                                              index,
+                                              context);
+                                        },
+                                      ),
+                                      _buildCouponSection(),
+                                    ],
+                                  ),
+                                ),
                 ),
                 _buildBottomBar(),
               ],
@@ -225,9 +236,11 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                 children: [
                   Checkbox(
                     activeColor: Colors.green,
-                    value: cartProvider.cartItems.every((item) => item['selected'] == true),
+                    value: cartProvider.cartItems
+                        .every((item) => item['selected'] == true),
                     onChanged: (value) {
-                      final updated = List<Map<String, dynamic>>.from(cartProvider.cartItems);
+                      final updated = List<Map<String, dynamic>>.from(
+                          cartProvider.cartItems);
                       for (var item in updated) {
                         item['selected'] = value ?? false;
                       }
@@ -236,7 +249,10 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                   ),
                   const Text(
                     "Chọn Tất Cả",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87),
                   ),
                 ],
               ),
@@ -252,7 +268,8 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
     );
   }
 
-  Widget _buildCartItem(Map<String, dynamic> product, int index, BuildContext context) {
+  Widget _buildCartItem(
+      Map<String, dynamic> product, int index, BuildContext context) {
     final String? image = product['image'];
     final String? thuongHieu = product['thuongHieu'];
     final String? name = product['name'];
@@ -299,7 +316,8 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                 bottomLeft: Radius.circular(12),
               ),
               child: Image.network(
-                image ?? "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=150",
+                image ??
+                    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=150",
                 width: imageSize,
                 height: imageSize,
                 fit: BoxFit.cover,
@@ -325,8 +343,8 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: _buildItemContent(
-                    thuongHieu, name, originalPrice, discountedPrice, soLuong, index, context, arrowButtonSize),
+                child: _buildItemContent(thuongHieu, name, originalPrice,
+                    discountedPrice, soLuong, index, context, arrowButtonSize),
               ),
             ),
           ],
@@ -401,7 +419,8 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
           children: [
             IconButton(
               onPressed: () => _updateQuantity(index, 1),
-              icon: Icon(Icons.keyboard_arrow_up, size: arrowButtonSize, color: Colors.blue[700]),
+              icon: Icon(Icons.keyboard_arrow_up,
+                  size: arrowButtonSize, color: Colors.blue[700]),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -415,7 +434,8 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
             ),
             IconButton(
               onPressed: () => _updateQuantity(index, -1),
-              icon: Icon(Icons.keyboard_arrow_down, size: arrowButtonSize, color: Colors.grey[700]),
+              icon: Icon(Icons.keyboard_arrow_down,
+                  size: arrowButtonSize, color: Colors.grey[700]),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -433,7 +453,10 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text("Mã giảm giá của bạn",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87)),
           const SizedBox(height: 8),
           TextField(
             controller: _couponController,
@@ -446,7 +469,8 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
               ),
               filled: true,
               fillColor: Colors.grey[200],
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             ),
           ),
         ],
@@ -457,7 +481,9 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
   Widget _buildBottomBar() {
     return Consumer<CartProvider>(
       builder: (context, cartProvider, child) {
-        final selectedItems = cartProvider.cartItems.where((item) => item['selected'] == true).toList();
+        final selectedItems = cartProvider.cartItems
+            .where((item) => item['selected'] == true)
+            .toList();
         double subtotal = 0;
         double discount = 0;
         const double shippingFee = 0;
@@ -465,7 +491,8 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
         for (var product in selectedItems) {
           final double originalPrice = product['gia'] as double;
           const double discountPercent = 20;
-          final double discountedPrice = originalPrice * (1 - discountPercent / 100);
+          final double discountedPrice =
+              originalPrice * (1 - discountPercent / 100);
           subtotal += discountedPrice * product['soLuong'];
         }
         if (_couponController.text.isNotEmpty) {
@@ -483,29 +510,37 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
           child: Column(
             children: [
               const Text("Tóm tắt đơn hàng",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87)),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Tổng phụ", style: TextStyle(fontSize: 14, color: Colors.black87)),
+                  const Text("Tổng phụ",
+                      style: TextStyle(fontSize: 14, color: Colors.black87)),
                   Text("${formatCurrency.format(subtotal)} ₫",
-                      style: const TextStyle(fontSize: 14, color: Colors.black87)),
+                      style:
+                          const TextStyle(fontSize: 14, color: Colors.black87)),
                 ],
               ),
               const SizedBox(height: 4),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Phí vận chuyển", style: TextStyle(fontSize: 14, color: Colors.black87)),
-                  const Text("Miễn phí", style: TextStyle(fontSize: 14, color: Colors.green)),
+                  const Text("Phí vận chuyển",
+                      style: TextStyle(fontSize: 14, color: Colors.black87)),
+                  const Text("Miễn phí",
+                      style: TextStyle(fontSize: 14, color: Colors.green)),
                 ],
               ),
               const SizedBox(height: 4),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Giảm giá", style: TextStyle(fontSize: 14, color: Colors.black87)),
+                  const Text("Giảm giá",
+                      style: TextStyle(fontSize: 14, color: Colors.black87)),
                   Text("-${formatCurrency.format(discount)} ₫",
                       style: const TextStyle(fontSize: 14, color: Colors.red)),
                 ],
@@ -515,16 +550,23 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text("Tổng (bao gồm VAT)",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87)),
                   Text("${formatCurrency.format(total)} ₫",
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+                      style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87)),
                 ],
               ),
               const SizedBox(height: 2),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("VAT ước tính", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  const Text("VAT ước tính",
+                      style: TextStyle(fontSize: 12, color: Colors.grey)),
                   Text("${formatCurrency.format(estimatedVat)} ₫",
                       style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                 ],
@@ -535,26 +577,32 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                 child: ElevatedButton(
                   onPressed: selectedItems.isNotEmpty
                       ? () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CheckoutScreen(
-                          selectedItems: selectedItems,
-                          totalPrice: total,
-                        ),
-                      ),
-                    );
-                    if (result == true) await _loadCart();
-                  }
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CheckoutScreen(
+                                selectedItems: selectedItems,
+                                totalPrice: total,
+                              ),
+                            ),
+                          );
+                          if (result == true) await _loadCart();
+                        }
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: selectedItems.isNotEmpty ? Colors.blue : Colors.grey[400],
+                    backgroundColor: selectedItems.isNotEmpty
+                        ? Colors.blue
+                        : Colors.grey[400],
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     elevation: 2,
                   ),
                   child: const Text("Tiếp tục",
-                      style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold)),
                 ),
               ),
             ],

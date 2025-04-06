@@ -18,7 +18,8 @@ class _AddressListScreenState extends State<AddressListScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final addressProvider = Provider.of<AddressProvider>(context, listen: false);
+      final addressProvider =
+          Provider.of<AddressProvider>(context, listen: false);
       final token = userProvider.token;
       if (token != null) {
         addressProvider.fetchAddresses(token);
@@ -30,7 +31,8 @@ class _AddressListScreenState extends State<AddressListScreen> {
     });
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context, Address addr, String token) {
+  void _showDeleteConfirmationDialog(
+      BuildContext context, Address addr, String token) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -49,7 +51,8 @@ class _AddressListScreenState extends State<AddressListScreen> {
               onPressed: () async {
                 Navigator.of(context).pop();
                 try {
-                  await Provider.of<AddressProvider>(context, listen: false).removeAddress(token, addr.idDiaChi);
+                  await Provider.of<AddressProvider>(context, listen: false)
+                      .removeAddress(token, addr.idDiaChi);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Xóa địa chỉ thành công!'),
@@ -91,147 +94,172 @@ class _AddressListScreenState extends State<AddressListScreen> {
       body: addressProvider.isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.blue))
           : addressProvider.errorMessage != null
-          ? Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                addressProvider.errorMessage!,
-                style: const TextStyle(color: Colors.red, fontSize: 16),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  final userProvider = Provider.of<UserProvider>(context, listen: false);
-                  final token = userProvider.token;
-                  if (token != null) {
-                    addressProvider.fetchAddresses(token);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: const Text(
-                  "Thử lại",
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        ),
-      )
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: addresses.isEmpty
-                  ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.location_off,
-                      size: 80,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      "Chưa có địa chỉ nào",
-                      style: TextStyle(color: Colors.grey, fontSize: 18),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "Hãy thêm địa chỉ để bắt đầu mua sắm!",
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
-                    ),
-                  ],
-                ),
-              )
-                  : ListView.builder(
-                itemCount: addresses.length,
-                itemBuilder: (context, index) {
-                  final addr = addresses[index];
-                  final userProvider = Provider.of<UserProvider>(context, listen: false);
-                  final token = userProvider.token;
-                  return RadioListTile(
-                    value: addr,
-                    groupValue: null,
-                    onChanged: (value) {},
-                    title: Text(
-                      addr.tenNguoiNhan,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "${addr.tenNha}, ${addr.xa}, ${addr.huyen}, ${addr.tinh}",
-                          style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                          addressProvider.errorMessage!,
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 16),
+                          textAlign: TextAlign.center,
                         ),
-                        Text(
-                          "SDT: ${addr.sdtNhanHang}",
-                          style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            final userProvider = Provider.of<UserProvider>(
+                                context,
+                                listen: false);
+                            final token = userProvider.token;
+                            if (token != null) {
+                              addressProvider.fetchAddresses(token);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 14, horizontal: 24),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: const Text(
+                            "Thử lại",
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
                         ),
                       ],
                     ),
-                    secondary: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: addresses.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.location_off,
+                                      size: 80,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    const Text(
+                                      "Chưa có địa chỉ nào",
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 18),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    const Text(
+                                      "Hãy thêm địa chỉ để bắt đầu mua sắm!",
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 14),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: addresses.length,
+                                itemBuilder: (context, index) {
+                                  final addr = addresses[index];
+                                  final userProvider =
+                                      Provider.of<UserProvider>(context,
+                                          listen: false);
+                                  final token = userProvider.token;
+                                  return RadioListTile(
+                                    value: addr,
+                                    groupValue: null,
+                                    onChanged: (value) {},
+                                    title: Text(
+                                      addr.tenNguoiNhan,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16),
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "${addr.tenNha}, ${addr.xa}, ${addr.huyen}, ${addr.tinh}",
+                                          style: TextStyle(
+                                              color: Colors.grey[700],
+                                              fontSize: 14),
+                                        ),
+                                        Text(
+                                          "SDT: ${addr.sdtNhanHang}",
+                                          style: TextStyle(
+                                              color: Colors.grey[700],
+                                              fontSize: 14),
+                                        ),
+                                      ],
+                                    ),
+                                    secondary: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.edit,
+                                              color: Colors.blue),
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    AddAddressScreen(
+                                                        address: addr),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete,
+                                              color: Colors.red),
+                                          onPressed: token != null
+                                              ? () =>
+                                                  _showDeleteConfirmationDialog(
+                                                      context, addr, token)
+                                              : null,
+                                        ),
+                                      ],
+                                    ),
+                                    activeColor: Colors.blue,
+                                    controlAffinity:
+                                        ListTileControlAffinity.leading,
+                                  );
+                                },
+                              ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => AddAddressScreen(address: addr),
-                              ),
+                                  builder: (_) => const AddAddressScreen()),
                             );
                           },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: const Text(
+                            "Thêm Địa Chỉ Mới",
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: token != null
-                              ? () => _showDeleteConfirmationDialog(context, addr, token)
-                              : null,
-                        ),
-                      ],
-                    ),
-                    activeColor: Colors.blue,
-                    controlAffinity: ListTileControlAffinity.leading,
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AddAddressScreen()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ],
+                  ),
                 ),
-                child: const Text(
-                  "Thêm Địa Chỉ Mới",
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -257,9 +285,12 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   @override
   void initState() {
     super.initState();
-    _sdtController = TextEditingController(text: widget.address?.sdtNhanHang ?? '');
-    _tenNguoiNhanController = TextEditingController(text: widget.address?.tenNguoiNhan ?? '');
-    _tenNhaController = TextEditingController(text: widget.address?.tenNha ?? '');
+    _sdtController =
+        TextEditingController(text: widget.address?.sdtNhanHang ?? '');
+    _tenNguoiNhanController =
+        TextEditingController(text: widget.address?.tenNguoiNhan ?? '');
+    _tenNhaController =
+        TextEditingController(text: widget.address?.tenNha ?? '');
     _tinhController = TextEditingController(text: widget.address?.tinh ?? '');
     _huyenController = TextEditingController(text: widget.address?.huyen ?? '');
     _xaController = TextEditingController(text: widget.address?.xa ?? '');
@@ -283,7 +314,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
       appBar: AppBar(
         title: Text(
           widget.address == null ? "Thêm địa chỉ" : "Sửa địa chỉ",
-          style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              color: Colors.black87, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         elevation: 1,
@@ -310,7 +342,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                   child: Text(
                     widget.address == null ? "Lưu" : "Cập nhật",
@@ -366,7 +399,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         xa: _xaController.text.trim(),
       );
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final addressProvider = Provider.of<AddressProvider>(context, listen: false);
+      final addressProvider =
+          Provider.of<AddressProvider>(context, listen: false);
       final token = userProvider.token;
       if (token != null) {
         if (widget.address == null) {

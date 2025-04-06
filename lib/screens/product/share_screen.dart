@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:share_plus/share_plus.dart';
 
-
 class ShareScreen extends StatelessWidget {
   final String? title;
   final String? content;
@@ -83,7 +82,8 @@ class ShareScreen extends StatelessWidget {
                 icon: const Icon(Iconsax.share),
                 label: const Text("Chia sẻ ngay"),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
@@ -97,6 +97,7 @@ class ShareScreen extends StatelessWidget {
       ),
     );
   }
+
   void _shareContent() {
     String shareText = "$title\n\n$content";
     if (url != null) {
