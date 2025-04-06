@@ -1,6 +1,6 @@
 import '../../core/api/api_client.dart';
+
 class CartService {
-  /// Lấy giỏ hàng từ API
   static Future<Map<String, dynamic>> getCart(String token) async {
     try {
       final response = await ApiClient.getData('cart', token: token);
@@ -10,8 +10,8 @@ class CartService {
     }
   }
 
-  /// Cập nhật số lượng của mục giỏ hàng
-  static Future<Map<String, dynamic>> updateCartItemQuantity(String token, int idMucGioHang, int soLuong) async {
+  static Future<Map<String, dynamic>> updateCartItemQuantity(
+      String token, int idMucGioHang, int soLuong) async {
     if (soLuong < 1) throw Exception('Số lượng phải >= 1');
     try {
       final response = await ApiClient.postData(
@@ -28,8 +28,8 @@ class CartService {
     }
   }
 
-  /// Xoá một mục khỏi giỏ hàng
-  static Future<Map<String, dynamic>> removeCartItem(String token, int idMucGioHang) async {
+  static Future<Map<String, dynamic>> removeCartItem(
+      String token, int idMucGioHang) async {
     try {
       final response = await ApiClient.postData(
         'cart/remove/$idMucGioHang',
@@ -45,11 +45,11 @@ class CartService {
     }
   }
 
-  /// Thêm sản phẩm vào giỏ hàng với variation_id
-  static Future<Map<String, dynamic>> addToCart(String token, int productId, int quantity, int variationId) async {
+  static Future<Map<String, dynamic>> addToCart(
+      String token, int productId, int quantity, int variationId) async {
     try {
       final response = await ApiClient.postData(
-        'cart/add/$productId', // Điều chỉnh endpoint theo backend
+        'cart/add/$productId',
         {
           "soLuong": quantity,
           "variation_id": variationId,

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../core/api/api_client.dart';
 import '../core/api/checkout_service.dart';
+
 class CheckoutProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
