@@ -3,8 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/cart_provider.dart';
+import '../../providers/product_provider.dart';
 import '../../providers/user_provider.dart';
-import '../main_screen.dart';
 import '../order/checkout_screen.dart';
 import '../product/product_detail_screen.dart';
 
