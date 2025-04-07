@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'api_client.dart';
 
 class MyOrderService {
@@ -6,7 +8,6 @@ class MyOrderService {
   static Future<List<dynamic>> getMyOrders(String token) async {
     try {
       final response = await ApiClient.getData('orders', token: token);
-      // API hiện trả về dạng { "orders": [ ... ] }
       if (response is Map<String, dynamic> && response.containsKey('orders')) {
         return response['orders'] as List<dynamic>;
       } else if (response is List) {
@@ -32,7 +33,6 @@ class MyOrderService {
   /// Hủy đơn hàng nếu đơn hàng ở trạng thái "cho_xac_nhan".
   static Future<Map<String, dynamic>> cancelOrder(String token, int orderId) async {
     try {
-      // Giả sử endpoint hủy đơn hàng là POST orders/{orderId}/cancel
       final response = await ApiClient.postData(
         'orders/$orderId/cancel',
         {},
@@ -44,6 +44,21 @@ class MyOrderService {
       return response;
     } catch (e) {
       throw Exception('Lỗi khi hủy đơn hàng: $e');
+    }
+  }
+
+  /// Kiểm tra xem một sản phẩm trong đơn hàng đã được đánh giá hay chưa.
+  static Future<bool> hasReviewedProduct(String token, int orderId, int productId, int variationId) async {
+    try {
+      final response = await ApiClient.getData(
+        'orders/$orderId/reviews/$productId/$variationId',
+        token: token,
+      );
+      // Giả định API trả về một trường 'hasReviewed' để xác định trạng thái
+      return response['hasReviewed'] ?? false;
+    } catch (e) {
+      print('Error checking review status: $e');
+      return false; // Trả về false nếu có lỗi
     }
   }
 }
