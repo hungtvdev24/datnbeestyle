@@ -9,6 +9,7 @@ class ReviewProvider extends ChangeNotifier {
       String token,
       int orderId,
       int productId,
+      int variationId, // Thêm variationId
       int rating,
       String? comment,
       String? imageUrl,
@@ -18,7 +19,15 @@ class ReviewProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await ReviewService.submitReview(token, orderId, productId, rating, comment, imageUrl);
+      final response = await ReviewService.submitReview(
+        token,
+        orderId,
+        productId,
+        variationId, // Truyền variationId
+        rating,
+        comment,
+        imageUrl,
+      );
       if (response.containsKey('message') && response['message'] == 'Đánh giá đã được gửi thành công!') {
         return true;
       } else {
