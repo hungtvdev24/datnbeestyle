@@ -183,7 +183,7 @@ class ProfileScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12.withOpacity(0.05),
+            color: Colors.black12.withAlpha(13), // Thay withOpacity(0.05) bằng withAlpha(13)
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -270,7 +270,7 @@ class ProfileScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12.withOpacity(0.05),
+            color: Colors.black12.withAlpha(13), // Thay withOpacity(0.05) bằng withAlpha(13)
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -364,6 +364,13 @@ class ProfileScreen extends StatelessWidget {
               () {},
         ),
         _buildProfileOption(
+          Icons.chat,
+          "Chat với Admin", // Cập nhật tiêu đề để phản ánh việc chat với Admin
+              () {
+            Navigator.pushNamed(context, AppRoutes.adminList); // Cập nhật để điều hướng đến AdminListScreen
+          },
+        ),
+        _buildProfileOption(
           Icons.settings,
           "Cài đặt",
               () {},
@@ -380,7 +387,7 @@ class ProfileScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12.withOpacity(0.05),
+            color: Colors.black12.withAlpha(13), // Thay withOpacity(0.05) bằng withAlpha(13)
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -412,7 +419,7 @@ class ProfileScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black12.withOpacity(0.05),
+                color: Colors.black12.withAlpha(13), // Thay withOpacity(0.05) bằng withAlpha(13)
                 blurRadius: 6,
                 offset: const Offset(0, 3),
               ),
@@ -469,8 +476,7 @@ class ProfileScreen extends StatelessWidget {
                         width: 50,
                         height: 50,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.error),
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
                       ),
                     ),
                     title: Text(
@@ -571,9 +577,9 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
-              child: const Text(
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+              child: Text(
                 "Bạn có chắc chắn muốn đăng xuất khỏi tài khoản của mình không?",
                 style: TextStyle(
                   fontSize: 16,
