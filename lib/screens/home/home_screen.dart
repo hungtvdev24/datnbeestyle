@@ -7,6 +7,28 @@ import '../product/product_detail_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  // Danh sách ảnh cho 3 banner
+  final List<List<String>> bannerImages = const [
+    // Banner 1: 3 ảnh
+    [
+      "assets/anh11.png",
+      "assets/anh12.png",
+      "assets/anh13.png",
+    ],
+    // Banner 2: 3 ảnh
+    [
+      "assets/anh14.png",
+      "assets/anh15.png",
+      "assets/anh16.png",
+    ],
+    // Banner 3: 3 ảnh
+    [
+      "assets/anh17.png",
+      "assets/anh18.png",
+      "assets/anh19.png",
+    ],
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,32 +110,20 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Banner 1
-                _buildBanner(
-                  title: "BLACK FRIDAY\nBỘ SƯU TẬP",
-                  discountText: "GIẢM 50%",
-                  imageUrl: "assets/anh11.png",
-                ),
+                // 1. Banner 1 (Slide - Chỉ hiển thị ảnh)
+                _buildBanner(imageUrls: bannerImages[0]),
                 const SizedBox(height: 16),
 
                 // 2. Sản phẩm phổ biến (lướt ngang)
                 _buildProductSection("Sản phẩm phổ biến", provider.products, context),
                 const SizedBox(height: 20),
 
-                // 3. Banner 2
-                _buildBanner(
-                  title: "FS - MÙA MỚI",
-                  discountText: "GIẢM 30%",
-                  imageUrl: "assets/anh14.png",
-                ),
+                // 3. Banner 2 (Slide - Chỉ hiển thị ảnh)
+                _buildBanner(imageUrls: bannerImages[1]),
                 const SizedBox(height: 16),
 
-                // 4. Banner 3
-                _buildBanner(
-                  title: "BỘ SƯU TẬP MÙA XUÂN",
-                  discountText: "GIẢM 20%",
-                  imageUrl: "assets/anh17.png",
-                ),
+                // 4. Banner 3 (Slide - Chỉ hiển thị ảnh)
+                _buildBanner(imageUrls: bannerImages[2]),
                 const SizedBox(height: 16),
 
                 // 5. Hàng mới về (lướt ngang)
@@ -132,100 +142,27 @@ class HomeScreen extends StatelessWidget {
   }
 
   // --------------------------------------------------------------------------
-  //  WIDGET BANNER (TÁI SỬ DỤNG)
+  //  WIDGET BANNER (CHỈ HIỂN THỊ ẢNH DẠNG SLIDE)
   // --------------------------------------------------------------------------
   Widget _buildBanner({
-    required String title,
-    required String discountText,
-    required String imageUrl,
+    required List<String> imageUrls,
   }) {
-    return Stack(
-      children: [
-        Container(
-          height: 200,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.8),
-            image: DecorationImage(
-              image: AssetImage(imageUrl),
-              fit: BoxFit.cover,
-              colorFilter: const ColorFilter.mode(
-                Colors.black54,
-                BlendMode.darken,
+    return Container(
+      height: 200,
+      width: double.infinity,
+      child: PageView.builder(
+        itemCount: imageUrls.length,
+        itemBuilder: (context, index) {
+          return Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(imageUrls[index]),
+                fit: BoxFit.cover,
               ),
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Roboto',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  color: Colors.white,
-                  child: Text(
-                    discountText,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Roboto',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        Positioned(
-          right: 16,
-          top: 0,
-          bottom: 0,
-          child: IconButton(
-            icon: const Icon(Icons.arrow_forward, color: Colors.white),
-            onPressed: () {},
-          ),
-        ),
-        Positioned(
-          left: 16,
-          top: 0,
-          bottom: 0,
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {},
-          ),
-        ),
-        Positioned(
-          bottom: 10,
-          left: 0,
-          right: 0,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(3, (index) {
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: index == 0 ? Colors.white : Colors.white.withOpacity(0.5),
-                ),
-              );
-            }),
-          ),
-        ),
-      ],
+          );
+        },
+      ),
     );
   }
 
@@ -302,6 +239,7 @@ class HomeScreen extends StatelessWidget {
   Widget _buildProductCard(dynamic product, BuildContext context) {
     final formatCurrency = NumberFormat("#,###", "vi_VN");
 
+    // Lấy URL hình ảnh từ variations
     String imageUrl = "https://picsum.photos/400/200";
     try {
       if (product['variations'] != null &&
@@ -315,10 +253,17 @@ class HomeScreen extends StatelessWidget {
       print("Error accessing image URL: $e");
     }
 
+    // Lấy giá từ variation nếu có, nếu không thì lấy từ product['gia']
+    final double price = product['variations'] != null &&
+        product['variations'].isNotEmpty &&
+        product['variations'][0]['price'] != null
+        ? (double.tryParse(product['variations'][0]['price'].toString()) ?? 0.0)
+        : (double.tryParse(product['gia'].toString()) ?? 0.0);
+
+    final priceText = "${formatCurrency.format(price)} VNĐ";
+
     final thuongHieu = product['thuongHieu']?.toString() ?? "Không có thương hiệu";
     final tenSanPham = product['tenSanPham']?.toString() ?? "Không có tên";
-    final double price = double.tryParse(product['gia']?.toString() ?? '0') ?? 0.0;
-    final priceText = "${formatCurrency.format(price)} VNĐ";
     final avgRating = double.tryParse(product['soSaoDanhGia']?.toString() ?? '0') ?? 0.0;
 
     return GestureDetector(
