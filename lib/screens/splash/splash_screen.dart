@@ -37,12 +37,30 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SizedBox(
-        width: double.infinity,
-        height: double.infinity,
-        child: Image.asset(
-          'assets/images/anh5.png',
-          fit: BoxFit.cover,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Beestyle',
+              style: TextStyle(
+                fontSize: 48, // Adjust size to match the image
+                fontWeight: FontWeight.bold, // Bold for "Beestyle"
+                color: Colors.grey[600], // Match the grey color in the image
+                fontFamily: 'YourFontFamily', // Replace with the font used in the image if known
+              ),
+            ),
+            const SizedBox(height: 8), // Space between the two texts
+            Text(
+              'Fashion Shopping',
+              style: TextStyle(
+                fontSize: 16, // Smaller size for "Fashion Shopping"
+                fontWeight: FontWeight.normal,
+                color: Colors.grey[600], // Same grey color
+                fontFamily: 'YourFontFamily', // Replace with the font used in the image if known
+              ),
+            ),
+          ],
         ),
       ),
     );
