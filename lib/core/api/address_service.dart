@@ -39,7 +39,7 @@ class AddressService {
       throw Exception('Failed to update address: $e');
     }
   }
-
+  // hợp lya
   static Future<void> removeAddress(String token, int idDiaChi) async {
     try {
       await ApiClient.deleteData('addresses/$idDiaChi', token: token);
