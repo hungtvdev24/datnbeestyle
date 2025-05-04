@@ -1,4 +1,4 @@
-import '../api/api_client.dart';
+import '../../core/api/api_client.dart';
 
 class CheckoutService {
   static Future<Map<String, dynamic>> placeOrder({
