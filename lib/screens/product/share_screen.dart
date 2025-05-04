@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:iconsax/iconsax.dart';
 
 class ShareScreen extends StatelessWidget {
   final String? title;
@@ -21,6 +21,7 @@ class ShareScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Stack(
           children: [
+            // Phần trên (nền hồng, chứa hình minh họa)
             Container(
               height: 280,
               width: double.infinity,
@@ -36,11 +37,11 @@ class ShareScreen extends StatelessWidget {
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Image.asset(
-                      'assets/login_header.png',
+                      'assets/login_header.png', // Thay bằng hình ảnh phù hợp
                       height: 280,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.error),
+                      const Icon(Icons.error),
                     ),
                   ),
                 ],
@@ -55,14 +56,15 @@ class ShareScreen extends StatelessWidget {
                 onPressed: () => Navigator.pop(context),
               ),
             ),
+            // Phần nội dung
             Padding(
               padding: const EdgeInsets.only(top: 280),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0, vertical: 40.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Tiêu đề
                     Text(
                       "Chia sẻ",
                       style: const TextStyle(
@@ -73,6 +75,7 @@ class ShareScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    // Tiêu đề thông báo
                     Text(
                       title ?? "Không có tiêu đề",
                       style: const TextStyle(
@@ -83,6 +86,7 @@ class ShareScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
+                    // Nội dung thông báo
                     Text(
                       content ?? "Không có nội dung",
                       style: TextStyle(
@@ -92,6 +96,7 @@ class ShareScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
+                    // URL (nếu có)
                     if (url != null) ...[
                       const Text(
                         "Liên kết:",
@@ -114,6 +119,7 @@ class ShareScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                     ],
+                    // Nút chia sẻ
                     Center(
                       child: ElevatedButton.icon(
                         onPressed: () {

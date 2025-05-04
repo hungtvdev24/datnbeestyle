@@ -16,9 +16,12 @@ import 'screens/product/notification_screen.dart';
 import 'screens/product/category_detail_screen.dart';
 import 'screens/product/share_screen.dart';
 import 'screens/product/recent_history_screen.dart';
-import 'screens/product/review_screen.dart'; // Thêm ReviewScreen
+import 'screens/product/review_screen.dart';
 import 'screens/product/product_detail_screen.dart';
 import 'screens/order/order_screen.dart';
+import 'screens/profile/chat_screen.dart';
+import 'screens/profile/admin_list_screen.dart';
+import 'screens/profile/voucher_list_screen.dart'; // Thêm VoucherListScreen
 
 class AppRoutes {
   static const String splash = '/splash';
@@ -37,7 +40,10 @@ class AppRoutes {
   static const String share = '/share';
   static const String recentHistory = '/recent-history';
   static const String productDetail = '/product-detail';
-  static const String review = '/review'; // Thêm route cho ReviewScreen
+  static const String review = '/review';
+  static const String chat = '/chat';
+  static const String adminList = '/admin-list';
+  static const String voucherList = '/voucher-list'; // Thêm route mới
 }
 
 Map<String, WidgetBuilder> appRoutes = {
@@ -78,6 +84,15 @@ Map<String, WidgetBuilder> appRoutes = {
     return ReviewScreen(
       orderId: args['orderId'] as int,
       productId: args['productId'] as int,
+      variationId: args['variationId'] as int,
     );
   },
+  AppRoutes.chat: (context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    return ChatScreen(
+      receiver: args['receiver'],
+    );
+  },
+  AppRoutes.adminList: (context) => const AdminListScreen(),
+  AppRoutes.voucherList: (context) => const VoucherListScreen(), // Thêm route mới
 };

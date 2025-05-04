@@ -17,6 +17,7 @@ class ProductProvider extends ChangeNotifier {
   bool _hasError = false; // Trạng thái có lỗi
   bool _hasSearchError = false; // Trạng thái có lỗi tìm kiếm
   bool _hasReviewsError = false; // Trạng thái có lỗi tải đánh giá
+  Map<String, dynamic>? _productDetail; // Chi tiết sản phẩm
 
   List<dynamic> get products => _products;
   List<dynamic> get suggestedProducts => _suggestedProducts;
@@ -31,6 +32,7 @@ class ProductProvider extends ChangeNotifier {
   bool get hasError => _hasError;
   bool get hasSearchError => _hasSearchError;
   bool get hasReviewsError => _hasReviewsError;
+  Map<String, dynamic>? get productDetail => _productDetail;
 
   ProductProvider() {
     loadProducts();
@@ -48,7 +50,6 @@ class ProductProvider extends ChangeNotifier {
     try {
       final fetchedProducts = await _productService.fetchProducts();
       _products = fetchedProducts.map((product) {
-        // Đảm bảo rằng sản phẩm có variations, nếu không thì thêm một variations mặc định
         if (product['variations'] == null || product['variations'].isEmpty) {
           return {
             ...product,
@@ -60,7 +61,7 @@ class ProductProvider extends ChangeNotifier {
                 'price': product['gia'] ?? 0.0,
                 'stock': 0,
                 'images': [
-                  {'image_url': 'https://picsum.photos/400/200'} // Hình ảnh mặc định
+                  {'image_url': 'https://picsum.photos/400/200'}
                 ]
               }
             ]
@@ -71,12 +72,10 @@ class ProductProvider extends ChangeNotifier {
       if (_products.isEmpty) {
         _errorMessage = "Không có sản phẩm nào được tìm thấy.";
       }
-      print('Fetched products in ProductProvider: $_products');
     } catch (e) {
       _errorMessage = "Lỗi khi tải sản phẩm: $e";
       _hasError = true;
       _products = [];
-      print(_errorMessage);
     }
 
     _isLoading = false;
@@ -96,12 +95,10 @@ class ProductProvider extends ChangeNotifier {
       if (_reviews.isEmpty) {
         _reviewsErrorMessage = "Chưa có đánh giá nào cho sản phẩm này.";
       }
-      print('Fetched reviews in ProductProvider: $_reviews');
     } catch (e) {
       _reviewsErrorMessage = "Lỗi khi tải đánh giá: $e";
       _hasReviewsError = true;
       _reviews = [];
-      print(_reviewsErrorMessage);
     }
 
     _isLoadingReviews = false;
@@ -127,7 +124,6 @@ class ProductProvider extends ChangeNotifier {
     try {
       final results = await _productService.searchProducts(query);
       _searchResults = results.map((product) {
-        // Đảm bảo rằng sản phẩm có variations, nếu không thì thêm một variations mặc định
         if (product['variations'] == null || product['variations'].isEmpty) {
           return {
             ...product,
@@ -139,7 +135,7 @@ class ProductProvider extends ChangeNotifier {
                 'price': product['gia'] ?? 0.0,
                 'stock': 0,
                 'images': [
-                  {'image_url': 'https://picsum.photos/400/200'} // Hình ảnh mặc định
+                  {'image_url': 'https://picsum.photos/400/200'}
                 ]
               }
             ]
@@ -150,12 +146,10 @@ class ProductProvider extends ChangeNotifier {
       if (_searchResults.isEmpty) {
         _searchErrorMessage = "Không tìm thấy sản phẩm nào.";
       }
-      print('Search results in ProductProvider: $_searchResults');
     } catch (e) {
       _searchErrorMessage = "Lỗi khi tìm kiếm sản phẩm: $e";
       _hasSearchError = true;
       _searchResults = [];
-      print(_searchErrorMessage);
     }
 
     _isSearching = false;
@@ -172,7 +166,6 @@ class ProductProvider extends ChangeNotifier {
       final allProducts = await _productService.fetchProducts();
       _suggestedProducts = allProducts.where((prod) => prod['id_danhMuc'] == categoryId).toList();
       _suggestedProducts = _suggestedProducts.map((product) {
-        // Đảm bảo rằng sản phẩm có variations, nếu không thì thêm một variations mặc định
         if (product['variations'] == null || product['variations'].isEmpty) {
           return {
             ...product,
@@ -184,7 +177,7 @@ class ProductProvider extends ChangeNotifier {
                 'price': product['gia'] ?? 0.0,
                 'stock': 0,
                 'images': [
-                  {'image_url': 'https://picsum.photos/400/200'} // Hình ảnh mặc định
+                  {'image_url': 'https://picsum.photos/400/200'}
                 ]
               }
             ]
@@ -209,7 +202,44 @@ class ProductProvider extends ChangeNotifier {
     await loadProducts();
   }
 
-  // Thêm phương thức để lấy sản phẩm theo ID
+  // Lấy chi tiết sản phẩm theo ID từ API
+  Future<void> fetchProductById(int productId) async {
+    _isLoading = true;
+    _productDetail = null;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final product = await _productService.fetchProductById(productId);
+      if (product['variations'] == null || product['variations'].isEmpty) {
+        _productDetail = {
+          ...product,
+          'variations': [
+            {
+              'id': null,
+              'color': 'Mặc định',
+              'size': null,
+              'price': product['gia'] ?? 0.0,
+              'stock': 0,
+              'images': [
+                {'image_url': 'https://picsum.photos/400/200'}
+              ]
+            }
+          ]
+        };
+      } else {
+        _productDetail = product;
+      }
+    } catch (e) {
+      _errorMessage = 'Lỗi khi tải chi tiết sản phẩm: $e';
+      _productDetail = null;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  // Lấy sản phẩm từ danh sách hiện có (nếu không muốn gọi API)
   dynamic getProductById(int id) {
     return _products.firstWhere(
           (product) => product['id_sanPham'] == id,

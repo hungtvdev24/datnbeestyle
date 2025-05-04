@@ -23,6 +23,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isLoading = false; // Trạng thái loading khi gửi request đăng ký
   bool agreePolicy = false; // Trạng thái checkbox "đồng ý điều khoản"
+  bool _obscurePassword = true; // To toggle password visibility
+  bool _obscureConfirmPassword = true; // To toggle confirm password visibility
 
   // Hàm xử lý logic đăng ký
   void _register() async {
@@ -83,197 +85,237 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200], // Màu nền tổng thể: xám nhạt
-      body: SafeArea(
-        child: SingleChildScrollView( // Cho phép cuộn khi nội dung dài
-          child: Column(
-            children: [
-              // 1. Ảnh header
-              const SizedBox(height: 16),
-              Center(
-                child: Image.asset(
-                  'assets/login_header.png',
-                  height: 180,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.error), // Hiển thị lỗi nếu không tải được ảnh
+      backgroundColor: Colors.white, // Đồng bộ màu nền trắng với LoginScreen
+      body: SingleChildScrollView( // Cho phép cuộn khi nội dung dài
+        child: Stack(
+          children: [
+            // PHẦN TRÊN (nền hồng, chứa hình minh hoạ)
+            Container(
+              height: 280,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFCE4EC), // Màu hồng nhạt giống LoginScreen
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // 2. Tiêu đề
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Hãy bắt đầu nào!",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Image.asset(
+                      'assets/login_header.png', // Giữ nguyên hình ảnh
+                      height: 280,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.error),
                     ),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(height: 8),
-
-              // 3. Mô tả ngắn
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Vui lòng nhập thông tin hợp lệ để tạo tài khoản.",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[700],
+            ),
+            // Close button at the top-left
+            Positioned(
+              top: 16,
+              left: 16,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.black),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+            // PHẦN DƯỚI (Form đăng ký)
+            Padding(
+              padding: const EdgeInsets.only(top: 280), // Đẩy form xuống dưới banner
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    const Text(
+                      "Hãy bắt đầu nào!",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black, // Đồng bộ màu chữ đen
+                        fontFamily: 'Roboto', // Đồng bộ font với LoginScreen
+                      ),
                     ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
+                    const SizedBox(height: 24),
 
-              // 4. Form đăng ký (Container trắng chứa các trường nhập liệu)
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white, // Nền trắng nổi bật trên nền xám
-                  borderRadius: BorderRadius.circular(16), // Bo góc
-                ),
-                child: Form(
-                  key: _formKey, // Gắn key để validate form
-                  child: Column(
-                    children: [
-                      // Trường nhập tên
-                      _buildTextField(
-                        nameController,
-                        "Tên",
-                        Icons.person,
-                        "Vui lòng nhập tên",
-                      ),
-                      // Trường nhập email
-                      _buildTextField(
-                        emailController,
-                        "Địa chỉ Email",
-                        Icons.email,
-                        "Vui lòng nhập email",
-                        isEmail: true,
-                      ),
-                      // Trường nhập số điện thoại
-                      _buildTextField(
-                        phoneController,
-                        "Số điện thoại",
-                        Icons.phone,
-                        "Vui lòng nhập số điện thoại",
-                      ),
-                      // Trường nhập mật khẩu
-                      _buildTextField(
-                        passwordController,
-                        "Mật khẩu",
-                        Icons.lock,
-                        "Vui lòng nhập mật khẩu",
-                        isPassword: true,
-                      ),
-                      // Trường xác nhận mật khẩu
-                      _buildTextField(
-                        confirmPasswordController,
-                        "Xác nhận mật khẩu",
-                        Icons.lock,
-                        "Vui lòng xác nhận mật khẩu",
-                        isPassword: true,
-                        confirmPasswordOf: passwordController,
-                      ),
-                      const SizedBox(height: 12),
-
-                      // 5. Checkbox điều khoản
-                      Row(
+                    Form(
+                      key: _formKey,
+                      child: Column(
                         children: [
-                          Checkbox(
-                            value: agreePolicy,
-                            onChanged: (val) {
+                          // Trường nhập tên
+                          _buildTextField(
+                            nameController,
+                            "Tên",
+                            "Vui lòng nhập tên",
+                          ),
+                          const SizedBox(height: 16),
+                          // Trường nhập email
+                          _buildTextField(
+                            emailController,
+                            "Email",
+                            "Vui lòng nhập địa chỉ Email",
+                            isEmail: true,
+                          ),
+                          const SizedBox(height: 16),
+                          // Trường nhập số điện thoại
+                          _buildTextField(
+                            phoneController,
+                            "Số điện thoại",
+                            "Vui lòng nhập số điện thoại",
+                            isPhone: true,
+                          ),
+                          const SizedBox(height: 16),
+                          // Trường nhập mật khẩu
+                          _buildTextField(
+                            passwordController,
+                            "Mật khẩu",
+                            "Vui lòng nhập mật khẩu",
+                            isPassword: true,
+                            obscureText: _obscurePassword,
+                            onToggleVisibility: () {
                               setState(() {
-                                agreePolicy = val ?? false; // Cập nhật trạng thái checkbox
+                                _obscurePassword = !_obscurePassword;
                               });
                             },
                           ),
-                          Flexible(
-                            child: Text.rich(
-                              TextSpan(
-                                text: "Tôi đồng ý với ",
-                                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-                                children: [
+                          const SizedBox(height: 16),
+                          // Trường xác nhận mật khẩu
+                          _buildTextField(
+                            confirmPasswordController,
+                            "Xác nhận mật khẩu",
+                            "Vui lòng xác nhận mật khẩu",
+                            isPassword: true,
+                            obscureText: _obscureConfirmPassword,
+                            onToggleVisibility: () {
+                              setState(() {
+                                _obscureConfirmPassword = !_obscureConfirmPassword;
+                              });
+                            },
+                            confirmPasswordOf: passwordController,
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Checkbox điều khoản
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: agreePolicy,
+                                onChanged: (val) {
+                                  setState(() {
+                                    agreePolicy = val ?? false;
+                                  });
+                                },
+                              ),
+                              Flexible(
+                                child: Text.rich(
                                   TextSpan(
-                                    text: "Điều khoản dịch vụ",
-                                    style: TextStyle(fontSize: 14, color: Colors.blue), // Chưa có sự kiện nhấp vào
+                                    text: "Tôi đồng ý với ",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black, // Đồng bộ màu đen
+                                      fontFamily: 'Roboto', // Đồng bộ font
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: "Điều khoản dịch vụ",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.pink, // Đồng bộ màu hồng cho liên kết
+                                          fontFamily: 'Roboto',
+                                        ),
+                                      ),
+                                      const TextSpan(text: " & "),
+                                      TextSpan(
+                                        text: "chính sách bảo mật.",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.pink, // Đồng bộ màu hồng cho liên kết
+                                          fontFamily: 'Roboto',
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const TextSpan(text: " & "),
-                                  TextSpan(
-                                    text: "chính sách bảo mật.",
-                                    style: TextStyle(fontSize: 14, color: Colors.blue), // Chưa có sự kiện nhấp vào
-                                  ),
-                                ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Nút "Tiếp tục"
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white, // Đồng bộ nền trắng
+                                foregroundColor: Colors.black, // Đồng bộ màu chữ đen
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24), // Đồng bộ bo góc 24
+                                  side: const BorderSide(color: Colors.black), // Đồng bộ viền đen
+                                ),
+                                elevation: 0,
+                              ),
+                              onPressed: isLoading ? null : _register,
+                              child: isLoading
+                                  ? const CircularProgressIndicator(
+                                color: Colors.black, // Đồng bộ màu loading
+                              )
+                                  : const Text(
+                                "Tiếp tục",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black, // Đồng bộ màu chữ đen
+                                  fontFamily: 'Roboto', // Đồng bộ font
+                                ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
+                          const SizedBox(height: 24),
 
-                      // 6. Nút "Tiếp tục"
-                      isLoading
-                          ? const CircularProgressIndicator() // Hiển thị loading khi đang xử lý
-                          : SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _register, // Gọi hàm đăng ký khi nhấn
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.lightBlue, // Màu xanh nhạt
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            "Tiếp tục",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // 7. Link chuyển sang màn đăng nhập
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            "Bạn đã có tài khoản? ",
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
-                          GestureDetector(
-                            onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.login), // Chuyển sang màn login
-                            child: const Text(
-                              "Đăng nhập",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.lightBlue,
-                                fontWeight: FontWeight.bold,
+                          // Link chuyển sang màn đăng nhập
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Bạn đã có tài khoản? ",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black, // Đồng bộ màu đen
+                                  fontFamily: 'Roboto', // Đồng bộ font
+                                ),
                               ),
-                            ),
-                          )
+                              GestureDetector(
+                                onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.login),
+                                child: const Text(
+                                  "Đăng nhập",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.pink, // Đồng bộ màu hồng cho liên kết
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Roboto', // Đồng bộ font
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -282,51 +324,78 @@ class _RegisterScreenState extends State<RegisterScreen> {
   /// Hàm tái sử dụng để tạo TextFormField
   Widget _buildTextField(
       TextEditingController controller,
-      String label,
-      IconData icon,
+      String hintText,
       String errorText, {
         bool isEmail = false,
         bool isPassword = false,
+        bool isPhone = false, // Thêm flag cho số điện thoại
+        bool obscureText = false,
+        VoidCallback? onToggleVisibility,
         TextEditingController? confirmPasswordOf,
       }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        obscureText: isPassword, // Ẩn text nếu là mật khẩu
-        keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text, // Bàn phím phù hợp
-        decoration: InputDecoration(
-          hintText: label,
-          prefixIcon: Icon(icon, color: Colors.grey[700]),
-          filled: true,
-          fillColor: Colors.grey[100], // Nền xám nhạt cho trường nhập
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none, // Không viền
-          ),
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText, // Ẩn text nếu là mật khẩu
+      keyboardType: isEmail
+          ? TextInputType.emailAddress
+          : (isPhone ? TextInputType.phone : TextInputType.text), // Thêm kiểu bàn phím cho sdt
+      decoration: InputDecoration(
+        hintText: hintText,
+        filled: true,
+        fillColor: Colors.grey[100], // Đồng bộ màu nền xám nhạt
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8), // Đồng bộ bo góc 8
+          borderSide: BorderSide.none, // Không viền
         ),
-        validator: (value) { // Logic validate cho từng trường
-          if (value == null || value.trim().isEmpty) {
-            return errorText;
-          }
-          if (isEmail) {
-            final emailRegExp = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-            if (!emailRegExp.hasMatch(value.trim())) {
-              return "Email không hợp lệ";
-            }
-          }
-          if (isPassword && value.length < 6) {
-            return "Mật khẩu tối thiểu 6 ký tự";
-          }
-          if (confirmPasswordOf != null) {
-            if (value.trim() != confirmPasswordOf.text.trim()) {
-              return "Mật khẩu không khớp";
-            }
-          }
-          return null;
-        },
+        suffixIcon: isPassword
+            ? IconButton(
+          icon: Icon(
+            obscureText ? Icons.visibility_off : Icons.visibility,
+            color: Colors.grey,
+          ),
+          onPressed: onToggleVisibility,
+        )
+            : null,
       ),
+      style: const TextStyle(fontFamily: 'Roboto'), // Đồng bộ font
+      validator: (value) {
+        // Nếu chưa nhập thì chỉ validate khi là trường bắt buộc
+        if (value == null || value.trim().isEmpty) {
+          // Số điện thoại không bắt buộc, nên nếu để trống thì hợp lệ
+          if (isPhone) return null;
+          return errorText;
+        }
+
+        // Validation cho email
+        if (isEmail) {
+          final emailRegExp = RegExp(r'^[^@]+@gmail\.com$');
+          if (!emailRegExp.hasMatch(value.trim())) {
+            return "Email phải có định dạng @gmail.com";
+          }
+        }
+
+        // Validation cho số điện thoại (nếu có nhập)
+        if (isPhone && value.trim().isNotEmpty) {
+          final phoneRegExp = RegExp(r'^0\d{9}$');
+          if (!phoneRegExp.hasMatch(value.trim())) {
+            return "Số điện thoại phải bắt đầu bằng 0 và có đúng 10 số";
+          }
+        }
+
+        // Validation cho mật khẩu
+        if (isPassword && value.length < 6) {
+          return "Mật khẩu tối thiểu 6 ký tự";
+        }
+
+        // Validation cho xác nhận mật khẩu
+        if (confirmPasswordOf != null) {
+          if (value.trim() != confirmPasswordOf.text.trim()) {
+            return "Mật khẩu không khớp";
+          }
+        }
+
+        return null;
+      },
     );
   }
 }

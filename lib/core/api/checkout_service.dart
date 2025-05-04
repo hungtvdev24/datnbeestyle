@@ -1,4 +1,6 @@
-import '../../core/api/api_client.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import './api_client.dart';
 
 class CheckoutService {
   static Future<Map<String, dynamic>> placeOrder({
@@ -7,6 +9,7 @@ class CheckoutService {
     required String phuongThucThanhToan,
     required List<Map<String, dynamic>> selectedItems,
     String? message,
+    String? voucherCode,
   }) async {
     try {
       final data = {
@@ -16,25 +19,23 @@ class CheckoutService {
           return {
             'id_mucGioHang': item['id_mucGioHang'],
             'id_sanPham': item['id_sanPham'],
+            'variation_id': item['variation_id'],
             'soLuong': item['soLuong'],
           };
         }).toList(),
         'message': message ?? '',
+        'voucher_code': voucherCode,
       };
 
-      final response = await ApiClient.postData(
-        'checkout',
-        data,
-        token: token,
-      );
+      final response = await ApiClient.postData('checkout', data, token: token);
 
-      if (response.containsKey('error')) {
-        throw Exception(response['error']);
-      }
-
-      return response;
+      return {
+        'message': response['message'] as String? ?? 'Đặt hàng thành công',
+        'donHang': response['donHang'] as Map<String, dynamic>?,
+        'qr_code': response['qr_code'] as String? ?? '',
+      };
     } catch (e) {
-      throw Exception('Lỗi khi đặt hàng (checkout): $e');
+      throw Exception('Lỗi khi đặt hàng: $e');
     }
   }
 }

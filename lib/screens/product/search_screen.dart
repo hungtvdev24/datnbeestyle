@@ -16,12 +16,12 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<String> searchHistory = [];
   bool _hasSearched = false;
-  late ProductProvider _productProvider; // Lưu trữ ProductProvider
+  late ProductProvider _productProvider;
 
   @override
   void initState() {
     super.initState();
-    _productProvider = Provider.of<ProductProvider>(context, listen: false); // Lưu trữ ProductProvider
+    _productProvider = Provider.of<ProductProvider>(context, listen: false);
     _loadSearchHistory();
   }
 
@@ -68,7 +68,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void dispose() {
     _searchController.dispose();
-    _productProvider.clearSearch(); // Sử dụng _productProvider đã lưu trữ
+    _productProvider.clearSearch();
     super.dispose();
   }
 
@@ -375,10 +375,25 @@ class _SearchScreenState extends State<SearchScreen> {
         ? product['variations'][0]['images'][0]['image_url']?.toString() ?? "https://via.placeholder.com/150"
         : product['urlHinhAnh']?.toString() ?? "https://via.placeholder.com/150";
 
+    // Lấy size từ variations (nếu có)
+    String? size;
+    if (product['variations'] != null &&
+        product['variations'].isNotEmpty &&
+        product['variations'][0]['size'] != null) {
+      size = product['variations'][0]['size'].toString();
+    }
+
+    // Lấy giá từ variation nếu có, nếu không thì lấy từ product['gia']
+    final double price = product['variations'] != null &&
+        product['variations'].isNotEmpty &&
+        product['variations'][0]['price'] != null
+        ? (double.tryParse(product['variations'][0]['price'].toString()) ?? 0.0)
+        : (double.tryParse(product['gia'].toString()) ?? 0.0);
+
+    final priceText = "${formatCurrency.format(price)} VNĐ";
+
     final thuongHieu = product['thuongHieu'] ?? "Không có thương hiệu";
     final tenSanPham = product['tenSanPham'] ?? "Không có tên";
-    final double originalPrice = double.tryParse(product['gia'].toString()) ?? 0.0;
-    final originalPriceText = "${formatCurrency.format(originalPrice)} VNĐ";
 
     return GestureDetector(
       onTap: () {
@@ -413,7 +428,6 @@ class _SearchScreenState extends State<SearchScreen> {
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      print("Error loading image for ${product['tenSanPham']}: $error");
                       return Container(
                         height: 120,
                         color: Colors.grey[300],
@@ -494,9 +508,22 @@ class _SearchScreenState extends State<SearchScreen> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (size != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        "Size: $size",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                          fontFamily: 'Roboto',
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                     const Spacer(),
                     Text(
-                      originalPriceText,
+                      priceText,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,

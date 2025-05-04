@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../core/api/api_client.dart';
 import '../../providers/myorder_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/product_provider.dart';
 import '../product/product_detail_screen.dart';
 import '../product/review_screen.dart';
 
@@ -226,185 +228,172 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     final int variationId = item['variation_id'] ?? 0;
     final String? image = item['variation'] != null &&
         item['variation']['images'] != null &&
-        (item['variation']['images'] as List).isNotEmpty
-        ? "http://212a-104-28-254-73.ngrok-free.app/storage/${item['variation']['images'][0]['image_url']}"
-        : null;
+        item['variation']['images'].isNotEmpty
+        ? ApiClient.getImageUrl(item['variation']['images'][0]['image_url'])
+        : "https://picsum.photos/150";
+
+    final bool hasReviewed = _hasReviewed[productId] ?? false;
+
+    // Chuẩn bị dữ liệu sản phẩm để truyền vào ProductDetailScreen
+    final productDetail = {
+      'urlHinhAnh': image,
+      'thuongHieu': thuongHieu ?? "Không có thương hiệu",
+      'tenSanPham': name ?? "Không có tên",
+      'gia': price,
+      'size': size,
+      'id_sanPham': productId,
+      'id_danhMuc': item['san_pham']?['id_danhMuc'] ?? 0,
+      'moTa': item['san_pham']?['moTa'] ?? "Không có mô tả",
+      'soSaoDanhGia': item['san_pham']?['soSaoDanhGia'] ?? 0,
+      'variations': item['variation'] != null ? [item['variation']] : [],
+    };
 
     final double screenWidth = MediaQuery.of(context).size.width;
     final double imageSize = screenWidth * 0.15;
-    final bool hasReviewed = _hasReviewed[productId] ?? false;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: () {
-              final productDetail = {
-                'id_sanPham': productId,
-                'urlHinhAnh': image ?? "https://picsum.photos/150",
-                'thuongHieu': thuongHieu,
-                'tenSanPham': name,
-                'gia': price,
-                'size': size,
-              };
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProductDetailScreen(product: productDetail),
-                ),
-              );
-            },
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    bottomLeft: Radius.circular(12),
-                  ),
-                  child: Image.network(
-                    image ?? "https://picsum.photos/150",
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailScreen(product: productDetail),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                bottomLeft: Radius.circular(12),
+              ),
+              child: Image.network(
+                image!,
+                width: imageSize,
+                height: imageSize,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey[300],
+                    alignment: Alignment.center,
                     width: imageSize,
                     height: imageSize,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      debugPrint('Failed to load image: $image, error: $error');
-                      return Container(
-                        color: Colors.grey[300],
-                        alignment: Alignment.center,
-                        width: imageSize,
-                        height: imageSize,
-                        child: const Text('No Image', style: TextStyle(fontFamily: 'Roboto')),
-                      );
-                    },
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return SizedBox(
-                        width: imageSize,
-                        height: imageSize,
-                        child: const Center(child: CircularProgressIndicator()),
-                      );
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          thuongHieu ?? "Không có thương hiệu",
-                          style: TextStyle(
-                            fontSize: screenWidth * 0.028,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                            fontFamily: 'Roboto',
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                    child: const Text('No Image', style: TextStyle(fontFamily: 'Roboto')),
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return SizedBox(
+                    width: imageSize,
+                    height: imageSize,
+                    child: const Center(child: CircularProgressIndicator()),
+                  );
+                },
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      thuongHieu ?? "Không có thương hiệu",
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.028,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Roboto',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      name ?? "Không có tên",
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.032,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                        fontFamily: 'Roboto',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    if (size != null)
+                      Text(
+                        "Size: $size",
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.032,
+                          color: Colors.grey[600],
+                          fontFamily: 'Roboto',
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          name ?? "Không có tên",
-                          style: TextStyle(
-                            fontSize: screenWidth * 0.032,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                            fontFamily: 'Roboto',
+                      ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "${formatCurrency.format(price)} VNĐ",
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.034,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                        fontFamily: 'Roboto',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      "Số lượng: $quantity",
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.032,
+                        color: Colors.grey[600],
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                    if (orderStatus == 'da_giao' && !hasReviewed)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ReviewScreen(
+                                  productId: productId,
+                                  variationId: variationId,
+                                  orderId: widget.orderId,
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFCE4EC),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        if (size != null)
-                          Text(
-                            "Size: $size",
+                          child: const Text(
+                            "Đánh giá",
                             style: TextStyle(
-                              fontSize: screenWidth * 0.032,
-                              color: Colors.grey[600],
+                              color: Colors.black,
                               fontFamily: 'Roboto',
                             ),
                           ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Số lượng: $quantity",
-                          style: TextStyle(
-                            fontSize: screenWidth * 0.032,
-                            color: Colors.grey[600],
-                            fontFamily: 'Roboto',
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "${formatCurrency.format(price)} ₫",
-                          style: TextStyle(
-                            fontSize: screenWidth * 0.034,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                            fontFamily: 'Roboto',
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (orderStatus == 'da_giao')
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: hasReviewed
-                    ? const Text(
-                  "Đã đánh giá",
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontSize: 14,
-                    fontFamily: 'Roboto',
-                  ),
-                )
-                    : ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReviewScreen(
-                          orderId: widget.orderId,
-                          productId: productId,
-                          variationId: variationId,
                         ),
                       ),
-                    ).then((value) {
-                      if (value == true) {
-                        setState(() {
-                          _hasReviewed[productId] = true;
-                        });
-                      }
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pink,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text(
-                    "Đánh giá",
-                    style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 14),
-                  ),
+                  ],
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -424,21 +413,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           children: [
             const Text(
               "Thông tin giao hàng",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Roboto'),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Roboto'),
             ),
             const SizedBox(height: 8),
             Text(
-              "Tên: ${orderDetail['ten_nguoiNhan'] ?? orderDetail['tenNguoiNhan'] ?? 'N/A'}",
+              orderDetail['diaChiGiaoHang'] ?? 'Chưa có thông tin',
               style: const TextStyle(fontSize: 14, fontFamily: 'Roboto'),
             ),
             const SizedBox(height: 4),
             Text(
-              "SĐT: ${orderDetail['sdt_nhanHang'] ?? orderDetail['soDienThoai'] ?? 'N/A'}",
+              orderDetail['tenNguoiNhan'] ?? 'Chưa có thông tin',
               style: const TextStyle(fontSize: 14, fontFamily: 'Roboto'),
             ),
             const SizedBox(height: 4),
             Text(
-              "Địa chỉ: ${orderDetail['ten_nha'] ?? orderDetail['diaChiGiaoHang'] ?? 'N/A'}, ${orderDetail['xa'] ?? ''}, ${orderDetail['huyen'] ?? ''}, ${orderDetail['tinh'] ?? ''}",
+              orderDetail['soDienThoai'] ?? 'Chưa có thông tin',
               style: const TextStyle(fontSize: 14, fontFamily: 'Roboto'),
             ),
           ],
@@ -462,42 +451,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           children: [
             const Text(
               "Thông tin thanh toán",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Roboto'),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Roboto'),
             ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Tổng tiền hàng", style: TextStyle(fontSize: 14, fontFamily: 'Roboto')),
-                Text("${formatCurrency.format(totalPrice)} ₫", style: const TextStyle(fontSize: 14, fontFamily: 'Roboto')),
-              ],
+            Text(
+              "Tổng tiền: ${formatCurrency.format(totalPrice)} ₫",
+              style: const TextStyle(fontSize: 14, fontFamily: 'Roboto'),
             ),
-            const SizedBox(height: 4),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Phí vận chuyển", style: TextStyle(fontSize: 14, fontFamily: 'Roboto')),
-                Text("Miễn phí", style: TextStyle(fontSize: 14, color: Colors.green, fontFamily: 'Roboto')),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Phương thức thanh toán", style: TextStyle(fontSize: 14, fontFamily: 'Roboto')),
-                Text("${orderDetail['phuongThucThanhToan'] ?? 'N/A'}", style: const TextStyle(fontSize: 14, fontFamily: 'Roboto')),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Tổng thanh toán", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Roboto')),
-                Text(
-                  "${formatCurrency.format(totalPrice)} ₫",
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87, fontFamily: 'Roboto'),
-                ),
-              ],
+            Text(
+              "Phương thức: ${orderDetail['phuongThucThanhToan'] ?? 'Chưa có thông tin'}",
+              style: const TextStyle(fontSize: 14, fontFamily: 'Roboto'),
             ),
           ],
         ),
@@ -511,28 +474,23 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: ElevatedButton(
         onPressed: () async {
           final userProvider = Provider.of<UserProvider>(context, listen: false);
-          final success = await orderProvider.cancelOrder(userProvider.token!, widget.orderId);
-          if (success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Đã hủy đơn hàng thành công!", style: TextStyle(fontFamily: 'Roboto'))),
-            );
+          if (userProvider.token != null) {
+            await orderProvider.cancelOrder(userProvider.token!, widget.orderId);
             await _loadOrderDetail();
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(orderProvider.errorMessage ?? "Lỗi khi hủy đơn hàng", style: const TextStyle(fontFamily: 'Roboto')),
-              ),
-            );
           }
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: const Color(0xFFFCE4EC),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
         child: const Text(
           "Hủy đơn hàng",
-          style: TextStyle(color: Colors.white, fontFamily: 'Roboto', fontSize: 16),
+          style: TextStyle(
+            color: Colors.black,
+            fontFamily: 'Roboto',
+          ),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../core/api/api_client.dart';
 import '../../providers/myorder_provider.dart';
 import '../../providers/user_provider.dart';
 import '../order/order_detail_screen.dart';
@@ -233,9 +234,9 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
     final int productId = item['id_sanPham'] ?? 0;
     final String? image = item['variation'] != null &&
         item['variation']['images'] != null &&
-        (item['variation']['images'] as List).isNotEmpty
-        ? "http://212a-104-28-254-73.ngrok-free.app/storage/${item['variation']['images'][0]['image_url']}"
-        : null;
+        item['variation']['images'].isNotEmpty
+        ? ApiClient.getImageUrl(item['variation']['images'][0]['image_url'])
+        : "https://picsum.photos/150";
 
     final double screenWidth = MediaQuery.of(context).size.width;
     final double imageSize = screenWidth * 0.15;
@@ -244,7 +245,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
       onTap: () {
         final productDetail = {
           'id_sanPham': productId,
-          'urlHinhAnh': image ?? "https://picsum.photos/150",
+          'urlHinhAnh': image,
           'thuongHieu': thuongHieu,
           'tenSanPham': name,
           'gia': price,
@@ -272,12 +273,12 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                 bottomLeft: Radius.circular(12),
               ),
               child: Image.network(
-                image ?? "https://picsum.photos/150",
+                image!,
                 width: imageSize,
                 height: imageSize,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  debugPrint("Error loading image: $error");
+                  debugPrint("Error loading image: $error, URL: $image");
                   return Container(
                     color: Colors.grey[300],
                     alignment: Alignment.center,
@@ -376,8 +377,10 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
           'productId': item['id_sanPham'] ?? 0,
           'variationId': item['variation_id'] ?? 0,
           'productName': item['san_pham'] != null ? item['san_pham']['tenSanPham'] : "Sản phẩm #${item['id_sanPham']}",
-          'productImage': item['variation'] != null && item['variation']['images'] != null && (item['variation']['images'] as List).isNotEmpty
-              ? "http://212a-104-28-254-73.ngrok-free.app/storage/${item['variation']['images'][0]['image_url']}"
+          'productImage': item['variation'] != null &&
+              item['variation']['images'] != null &&
+              item['variation']['images'].isNotEmpty
+              ? ApiClient.getImageUrl(item['variation']['images'][0]['image_url'])
               : "https://picsum.photos/150",
           'price': item['gia'],
           'quantity': item['soLuong'] ?? 1,
@@ -443,7 +446,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                       height: imageSize,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        debugPrint("Error loading purchased product image: $error");
+                        debugPrint("Error loading purchased product image: $error, URL: ${product['productImage']}");
                         return Container(
                           color: Colors.grey[300],
                           alignment: Alignment.center,

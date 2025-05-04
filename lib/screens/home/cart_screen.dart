@@ -1,16 +1,11 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
-import '../../main.dart';
-import '../../providers/cart_provider.dart';
-import '../../providers/user_provider.dart';
 import '../order/checkout_screen.dart';
 import '../product/product_detail_screen.dart';
-
-
+import '../../providers/user_provider.dart';
+import '../../providers/cart_provider.dart';
+import '../../main.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -26,7 +21,9 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
   @override
   void initState() {
     super.initState();
-    _loadCart();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCart();
+    });
   }
 
   @override
@@ -36,7 +33,6 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
     if (modalRoute is PageRoute) {
       routeObserver.subscribe(this, modalRoute);
     }
-    _loadCart();
   }
 
   @override
@@ -64,22 +60,15 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
 
     try {
       await cartProvider.loadCart(userProvider.token!, context);
-      debugPrint('Loaded cart items: ${cartProvider.cartItems}');
-      for (var item in cartProvider.cartItems) {
-        debugPrint('Product: ${item['name']}, Image URL: ${item['image']}');
-      }
     } catch (e) {
       cartProvider.setErrorMessage('Lỗi khi tải giỏ hàng: $e');
-      debugPrint('Cart loading error: $e');
     }
   }
 
   void _toggleSelect(int index) {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
-    final updatedItems =
-    List<Map<String, dynamic>>.from(cartProvider.cartItems);
-    updatedItems[index]['selected'] =
-    !(updatedItems[index]['selected'] ?? false);
+    final updatedItems = List<Map<String, dynamic>>.from(cartProvider.cartItems);
+    updatedItems[index]['selected'] = !(updatedItems[index]['selected'] ?? false);
     cartProvider.setCartItems(updatedItems);
   }
 
@@ -87,12 +76,11 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (userProvider.token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Vui lòng đăng nhập để cập nhật giỏ hàng!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vui lòng đăng nhập để cập nhật giỏ hàng!')));
       return;
     }
-    final updatedItems =
-    List<Map<String, dynamic>>.from(cartProvider.cartItems);
+    final updatedItems = List<Map<String, dynamic>>.from(cartProvider.cartItems);
     int currentQty = updatedItems[index]['soLuong'] ?? 1;
     int newQty = currentQty + change;
     if (newQty < 1) return;
@@ -100,8 +88,8 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
     cartProvider.setCartItems(updatedItems);
 
     try {
-      await cartProvider.updateCartItemQuantity(userProvider.token!,
-          updatedItems[index]['id_mucGioHang'], newQty, context);
+      await cartProvider.updateCartItemQuantity(
+          userProvider.token!, updatedItems[index]['id_mucGioHang'], newQty, context);
       await _loadCart();
     } catch (e) {
       updatedItems[index]['soLuong'] = currentQty;
@@ -119,28 +107,24 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
           const SnackBar(content: Text('Vui lòng đăng nhập để xóa mục!')));
       return;
     }
-    final selectedItems = cartProvider.cartItems
-        .where((item) => item['selected'] == true)
-        .toList();
+    final selectedItems = cartProvider.cartItems.where((item) => item['selected'] == true).toList();
     if (selectedItems.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Vui lòng chọn ít nhất một mục để xóa!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vui lòng chọn ít nhất một mục để xóa!')));
       return;
     }
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           backgroundColor: Colors.white,
           contentPadding: const EdgeInsets.all(0),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding:
-                const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                 decoration: const BoxDecoration(
                   color: Color(0xFFFCE4EC),
                   borderRadius: BorderRadius.only(
@@ -246,11 +230,10 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
     if (confirm == true) {
       for (var item in selectedItems) {
         try {
-          await cartProvider.removeCartItem(
-              userProvider.token!, item['id_mucGioHang'], context);
+          await cartProvider.removeCartItem(userProvider.token!, item['id_mucGioHang'], context);
         } catch (e) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('Lỗi khi xóa mục: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Lỗi khi xóa mục: $e')));
           await _loadCart();
           return;
         }
@@ -311,16 +294,12 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                         _buildHeader(),
                         ListView.builder(
                           shrinkWrap: true,
-                          physics:
-                          const NeverScrollableScrollPhysics(),
+                          physics: const NeverScrollableScrollPhysics(),
                           padding: const EdgeInsets.all(8),
-                          itemCount:
-                          cartProvider.cartItems.length,
+                          itemCount: cartProvider.cartItems.length,
                           itemBuilder: (context, index) {
                             return _buildCartItem(
-                                cartProvider.cartItems[index],
-                                index,
-                                context);
+                                cartProvider.cartItems[index], index, context);
                           },
                         ),
                         _buildCouponSection(),
@@ -350,11 +329,9 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                 children: [
                   Checkbox(
                     activeColor: Colors.pink,
-                    value: cartProvider.cartItems
-                        .every((item) => item['selected'] == true),
+                    value: cartProvider.cartItems.every((item) => item['selected'] == true),
                     onChanged: (value) {
-                      final updated = List<Map<String, dynamic>>.from(
-                          cartProvider.cartItems);
+                      final updated = List<Map<String, dynamic>>.from(cartProvider.cartItems);
                       for (var item in updated) {
                         item['selected'] = value ?? false;
                       }
@@ -390,28 +367,35 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
     );
   }
 
-  Widget _buildCartItem(
-      Map<String, dynamic> product, int index, BuildContext context) {
+  Widget _buildCartItem(Map<String, dynamic> product, int index, BuildContext context) {
     final String? image = product['image'];
     final String? thuongHieu = product['thuongHieu'];
-    final String? name = product['name'];
+    final String? name = product['name'] ?? product['tenSanPham'];
     final double originalPrice = product['gia'] as double;
     final int soLuong = product['soLuong'] ?? 1;
     final String? size = product['size'];
+    final int productId = product['id_sanPham'] ?? 0;
 
     final double screenWidth = MediaQuery.of(context).size.width;
     final double imageSize = screenWidth * 0.15;
     final double arrowButtonSize = screenWidth * 0.04;
 
+    // Chuẩn bị dữ liệu sản phẩm để truyền vào ProductDetailScreen
+    final productDetail = {
+      'urlHinhAnh': image ?? "https://picsum.photos/150",
+      'thuongHieu': thuongHieu ?? "Không có thương hiệu",
+      'tenSanPham': name ?? "Không có tên",
+      'gia': originalPrice,
+      'size': size,
+      'id_sanPham': productId,
+      'id_danhMuc': product['id_danhMuc'] ?? 0,
+      'moTa': product['moTa'] ?? "Không có mô tả",
+      'soSaoDanhGia': product['soSaoDanhGia'] ?? 0,
+      'variations': product['variations'] ?? [],
+    };
+
     return GestureDetector(
       onTap: () {
-        final productDetail = {
-          'urlHinhAnh': image ?? "https://picsum.photos/150",
-          'thuongHieu': thuongHieu,
-          'tenSanPham': name,
-          'gia': originalPrice,
-          'size': size,
-        };
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -444,13 +428,12 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                 height: imageSize,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  debugPrint('Failed to load image: $image, error: $error');
                   return Container(
                     color: Colors.grey[300],
                     alignment: Alignment.center,
                     width: imageSize,
                     height: imageSize,
-                    child: const Text('No Image'),
+                    child: const Text('No Image', style: TextStyle(fontFamily: 'Roboto')),
                   );
                 },
                 loadingBuilder: (context, child, loadingProgress) {
@@ -474,6 +457,7 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                   index,
                   context,
                   arrowButtonSize,
+                  size,
                 ),
               ),
             ),
@@ -491,6 +475,7 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
       int index,
       BuildContext context,
       double arrowButtonSize,
+      String? size,
       ) {
     final double screenWidth = MediaQuery.of(context).size.width;
     return Column(
@@ -520,6 +505,16 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
+        if (size != null)
+          Text(
+            "Size: $size",
+            style: TextStyle(
+              fontSize: screenWidth * 0.032,
+              color: Colors.grey[600],
+              fontFamily: 'Roboto',
+            ),
+          ),
+        const SizedBox(height: 4),
         Text(
           "${formatCurrency.format(originalPrice)} VNĐ",
           style: TextStyle(
@@ -537,8 +532,7 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
           children: [
             IconButton(
               onPressed: () => _updateQuantity(index, 1),
-              icon: Icon(Icons.keyboard_arrow_up,
-                  size: arrowButtonSize, color: Colors.pink),
+              icon: Icon(Icons.keyboard_arrow_up, size: arrowButtonSize, color: Colors.pink),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -553,8 +547,7 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
             ),
             IconButton(
               onPressed: () => _updateQuantity(index, -1),
-              icon: Icon(Icons.keyboard_arrow_down,
-                  size: arrowButtonSize, color: Colors.grey[700]),
+              icon: Icon(Icons.keyboard_arrow_down, size: arrowButtonSize, color: Colors.grey[700]),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -585,16 +578,14 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
             controller: _couponController,
             decoration: InputDecoration(
               hintText: "Nhập mã giảm giá",
-              hintStyle:
-              const TextStyle(color: Colors.grey, fontFamily: 'Roboto'),
+              hintStyle: const TextStyle(color: Colors.grey, fontFamily: 'Roboto'),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
               filled: true,
               fillColor: Colors.grey[100],
-              contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             ),
             style: const TextStyle(fontFamily: 'Roboto'),
           ),
@@ -606,9 +597,7 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
   Widget _buildBottomBar() {
     return Consumer<CartProvider>(
       builder: (context, cartProvider, child) {
-        final selectedItems = cartProvider.cartItems
-            .where((item) => item['selected'] == true)
-            .toList();
+        final selectedItems = cartProvider.cartItems.where((item) => item['selected'] == true).toList();
         double total = 0;
         for (var product in selectedItems) {
           final double originalPrice = product['gia'] as double;
@@ -641,9 +630,7 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                   }
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: selectedItems.isNotEmpty
-                        ? const Color(0xFFFCE4EC)
-                        : Colors.grey[400],
+                    backgroundColor: selectedItems.isNotEmpty ? const Color(0xFFFCE4EC) : Colors.grey[400],
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),

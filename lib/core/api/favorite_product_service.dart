@@ -1,7 +1,9 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'api_client.dart';
 
 class FavoriteProductService {
-  static const String baseUrl = 'https://6a67-42-117-88-252.ngrok-free.app/api'; // Cập nhật URL ngrok
+  static const String baseUrl = 'https://88a8-42-114-39-2.ngrok-free.app/api'; // Cập nhật URL ngrok
 
   /// Lấy danh sách sản phẩm yêu thích của người dùng.
   static Future<List<dynamic>> getFavoriteProducts(String token) async {

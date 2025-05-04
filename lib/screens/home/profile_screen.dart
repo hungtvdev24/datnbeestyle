@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/recent_products_provider.dart';
 import '../../routes.dart';
+import '../../core/models/user.dart'; // Thêm import để sử dụng User
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -91,7 +92,7 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   _buildProfileHeader(context, userData),
                   _buildAppIntroduction(),
-                  _buildVoucherSection(),
+                  _buildVoucherSection(context),
                   _buildSectionTitle("Tài khoản"),
                   _buildProfileOptions(context),
                   _buildHistorySection(context),
@@ -183,7 +184,7 @@ class ProfileScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12.withAlpha(13), // Thay withOpacity(0.05) bằng withAlpha(13)
+            color: Colors.black12.withAlpha(13),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -261,7 +262,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildVoucherSection() {
+  Widget _buildVoucherSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
@@ -270,7 +271,7 @@ class ProfileScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12.withAlpha(13), // Thay withOpacity(0.05) bằng withAlpha(13)
+            color: Colors.black12.withAlpha(13),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -299,7 +300,9 @@ class ProfileScreen extends StatelessWidget {
               ),
               elevation: 0,
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.voucherList);
+            },
             child: const Text(
               "Xem ngay",
               style: TextStyle(
@@ -342,6 +345,13 @@ class ProfileScreen extends StatelessWidget {
           },
         ),
         _buildProfileOption(
+          Icons.discount,
+          "Danh sách Voucher",
+              () {
+            Navigator.pushNamed(context, AppRoutes.voucherList);
+          },
+        ),
+        _buildProfileOption(
           Icons.autorenew,
           "Trả hàng (Returns)",
               () {},
@@ -365,9 +375,19 @@ class ProfileScreen extends StatelessWidget {
         ),
         _buildProfileOption(
           Icons.chat,
-          "Chat với Admin", // Cập nhật tiêu đề để phản ánh việc chat với Admin
+          "Chat với Admin",
               () {
-            Navigator.pushNamed(context, AppRoutes.adminList); // Cập nhật để điều hướng đến AdminListScreen
+            // Điều hướng trực tiếp đến ChatScreen với admin mặc định
+            final admin = User(
+              id: 1, // Giả sử admin có id=1, thay đổi nếu cần
+              name: 'Admin',
+              email: 'admin1@example.com',
+            );
+            Navigator.pushNamed(
+              context,
+              AppRoutes.chat,
+              arguments: {'receiver': admin},
+            );
           },
         ),
         _buildProfileOption(
@@ -387,7 +407,7 @@ class ProfileScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12.withAlpha(13), // Thay withOpacity(0.05) bằng withAlpha(13)
+            color: Colors.black12.withAlpha(13),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -419,7 +439,7 @@ class ProfileScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black12.withAlpha(13), // Thay withOpacity(0.05) bằng withAlpha(13)
+                color: Colors.black12.withAlpha(13),
                 blurRadius: 6,
                 offset: const Offset(0, 3),
               ),

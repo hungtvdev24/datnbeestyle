@@ -23,10 +23,10 @@ dependencies:
   vm_service: ^14.3.1
   iconsax: ^0.0.8
   cupertino_icons: ^1.0.8
-
-
-
-
+  pusher_channels_flutter: ^2.2.1 # Tích hợp Pusher để nhận tin nhắn thời gian thực
+  #  vnpay_flutter: ^1.0.3
+  webview_flutter: ^4.8.0
+  badges: ^3.0.3
 
 dev_dependencies:
   flutter_test:

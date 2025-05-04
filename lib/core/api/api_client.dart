@@ -1,183 +1,254 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
-  static const String baseUrl = "https://6a67-42-117-88-252.ngrok-free.app/api";
+  static const String baseUrl = "https://88a8-42-114-39-2.ngrok-free.app/api";
+  static const String storageUrl = "https://88a8-42-114-39-2.ngrok-free.app/storage";
 
-  // Phương thức POST
-  static Future<Map<String, dynamic>> postData(String url, Map<String, dynamic> data, {String? token}) async {
+  // Lấy token từ SharedPreferences
+  static Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    print('Retrieved token: $token');
+    return token;
+  }
+
+  // Lưu token
+  static Future<void> saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('auth_token', token);
+    print('Saved token: $token');
+  }
+
+  // Xóa token
+  static Future<void> clearToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+    await prefs.remove('user_id');
+    print('Cleared token and user_id');
+  }
+
+  // Gửi yêu cầu POST
+  static Future<Map<String, dynamic>> postData(
+      String endpoint,
+      Map<String, dynamic> data, {
+        String? token,
+        bool skipAuth = false,
+      }) async {
     try {
+      if (!skipAuth) {
+        token ??= await getToken();
+        if (token == null) {
+          throw Exception("Không tìm thấy token. Vui lòng đăng nhập lại.");
+        }
+      }
       final headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
         "ngrok-skip-browser-warning": "true",
       };
-      if (token != null) {
+      if (!skipAuth && token != null) {
         headers["Authorization"] = "Bearer $token";
       }
-
+      final url = endpoint.startsWith('http') ? endpoint : "$baseUrl/$endpoint";
+      print('POST request to: $url with data: $data');
       final response = await http.post(
-        Uri.parse("$baseUrl/$url"),
+        Uri.parse(url),
         headers: headers,
         body: jsonEncode(data),
-      ).timeout(const Duration(seconds: 10));
-
-      print('POST Request URL: $baseUrl/$url');
-      print('Request data: $data');
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      ).timeout(const Duration(seconds: 30));
+      print('Response: status=${response.statusCode}, body=${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);
       } else if (response.statusCode == 401) {
-        throw Exception("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
-      } else if (response.statusCode == 400) {
+        throw Exception("Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.");
+      } else if (response.statusCode == 422) {
         final errorBody = jsonDecode(response.body);
-        throw Exception(errorBody["message"] ?? "Yêu cầu không hợp lệ.");
-      } else if (response.statusCode == 500) {
-        throw Exception("Lỗi server: ${response.statusCode} - ${response.body}");
+        throw Exception('Dữ liệu không hợp lệ: ${errorBody["errors"] ?? response.body}');
       } else {
-        throw Exception("Lỗi không xác định: ${response.statusCode} - ${response.body}");
+        final errorBody = jsonDecode(response.body);
+        throw Exception('Lỗi ${response.statusCode}: ${errorBody["error"] ?? response.body}');
       }
-    } on TimeoutException {
-      throw Exception("Kết nối đến server quá lâu. Vui lòng thử lại.");
-    } on FormatException {
-      throw Exception("Dữ liệu từ server không đúng định dạng.");
-    } on http.ClientException {
-      throw Exception("Không thể kết nối đến server. Kiểm tra API hoặc mạng.");
     } catch (e) {
-      throw Exception("Đã xảy ra lỗi không xác định: $e");
+      print('Error in postData: $e');
+      rethrow;
     }
   }
 
-  // Phương thức GET
-  static Future<dynamic> getData(String url, {String? token}) async {
+  // Gửi yêu cầu GET
+  static Future<dynamic> getData(String endpoint, {String? token}) async {
     try {
+      token ??= await getToken();
+      if (token == null) {
+        throw Exception("Không tìm thấy token. Vui lòng đăng nhập lại.");
+      }
       final headers = {
         "Accept": "application/json",
         "ngrok-skip-browser-warning": "true",
+        "Authorization": "Bearer $token",
       };
-      if (token != null) {
-        headers["Authorization"] = "Bearer $token";
-      }
-
+      final url = endpoint.startsWith('http') ? endpoint : "$baseUrl/$endpoint";
+      print('GET request to: $url');
       final response = await http.get(
-        Uri.parse("$baseUrl/$url"),
+        Uri.parse(url),
         headers: headers,
-      ).timeout(const Duration(seconds: 10));
-
-      print('GET Request URL: $baseUrl/$url');
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      ).timeout(const Duration(seconds: 30));
+      print('Response: status=${response.statusCode}, body=${response.body}');
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else if (response.statusCode == 401) {
-        throw Exception("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
-      } else if (response.statusCode == 404) {
-        throw Exception("Không tìm thấy dữ liệu: ${response.statusCode}");
-      } else if (response.statusCode == 500) {
-        throw Exception("Lỗi server: ${response.statusCode} - ${response.body}");
+        throw Exception("Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.");
       } else {
-        throw Exception('Failed to load data: ${response.statusCode} - ${response.body}');
+        final errorBody = jsonDecode(response.body);
+        throw Exception('Lỗi ${response.statusCode}: ${errorBody["error"] ?? response.body}');
       }
-    } on TimeoutException {
-      throw Exception("Kết nối đến server quá lâu. Vui lòng thử lại.");
-    } on FormatException {
-      throw Exception("Dữ liệu từ server không đúng định dạng.");
-    } on http.ClientException {
-      throw Exception("Không thể kết nối đến server. Kiểm tra API hoặc mạng.");
     } catch (e) {
-      throw Exception("Đã xảy ra lỗi không xác định: $e");
+      print('Error in getData: $e');
+      rethrow;
     }
   }
 
-  // Phương thức PUT
-  static Future<Map<String, dynamic>> putData(String url, Map<String, dynamic> data, {String? token}) async {
+  // Gửi yêu cầu PUT
+  static Future<Map<String, dynamic>> putData(
+      String endpoint,
+      Map<String, dynamic> data, {
+        String? token,
+      }) async {
     try {
+      token ??= await getToken();
+      if (token == null) {
+        throw Exception("Không tìm thấy token. Vui lòng đăng nhập lại.");
+      }
       final headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
         "ngrok-skip-browser-warning": "true",
+        "Authorization": "Bearer $token",
       };
-      if (token != null) {
-        headers["Authorization"] = "Bearer $token";
-      }
-
+      final url = endpoint.startsWith('http') ? endpoint : "$baseUrl/$endpoint";
+      print('PUT request to: $url with data: $data');
       final response = await http.put(
-        Uri.parse("$baseUrl/$url"),
+        Uri.parse(url),
         headers: headers,
         body: jsonEncode(data),
-      ).timeout(const Duration(seconds: 10));
-
-      print('PUT Request URL: $baseUrl/$url');
-      print('Request data: $data');
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      ).timeout(const Duration(seconds: 30));
+      print('Response: status=${response.statusCode}, body=${response.body}');
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else if (response.statusCode == 401) {
-        throw Exception("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
-      } else if (response.statusCode == 400) {
-        final errorBody = jsonDecode(response.body);
-        throw Exception(errorBody["message"] ?? "Yêu cầu không hợp lệ.");
-      } else if (response.statusCode == 500) {
-        throw Exception("Lỗi server: ${response.statusCode} - ${response.body}");
+        throw Exception("Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.");
       } else {
-        throw Exception("Lỗi không xác định: ${response.statusCode} - ${response.body}");
+        final errorBody = jsonDecode(response.body);
+        throw Exception('Lỗi ${response.statusCode}: ${errorBody["error"]
+
+            ?? response.body}');
       }
-    } on TimeoutException {
-      throw Exception("Kết nối đến server quá lâu. Vui lòng thử lại.");
-    } on FormatException {
-      throw Exception("Dữ liệu từ server không đúng định dạng.");
-    } on http.ClientException {
-      throw Exception("Không thể kết nối đến server. Kiểm tra API hoặc mạng.");
     } catch (e) {
-      throw Exception("Đã xảy ra lỗi không xác định: $e");
+      print('Error in putData: $e');
+      rethrow;
     }
   }
 
-  // Phương thức DELETE
-  static Future<Map<String, dynamic>> deleteData(String url, {String? token}) async {
+  // Gửi yêu cầu DELETE
+  static Future<Map<String, dynamic>> deleteData(String endpoint, {String? token}) async {
     try {
+      token ??= await getToken();
+      if (token == null) {
+        throw Exception("Không tìm thấy token. Vui lòng đăng nhập lại.");
+      }
       final headers = {
         "Accept": "application/json",
         "ngrok-skip-browser-warning": "true",
+        "Authorization": "Bearer $token",
       };
-      if (token != null) {
-        headers["Authorization"] = "Bearer $token";
-      }
-
+      final url = endpoint.startsWith('http') ? endpoint : "$baseUrl/$endpoint";
+      print('DELETE request to: $url');
       final response = await http.delete(
-        Uri.parse("$baseUrl/$url"),
+        Uri.parse(url),
         headers: headers,
-      ).timeout(const Duration(seconds: 10));
-
-      print('DELETE Request URL: $baseUrl/$url');
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      ).timeout(const Duration(seconds: 30));
+      print('Response: status=${response.statusCode}, body=${response.body}');
 
       if (response.statusCode == 200) {
         return {"message": "Xóa thành công"};
       } else if (response.statusCode == 401) {
-        throw Exception("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
-      } else if (response.statusCode == 404) {
-        throw Exception("Không tìm thấy dữ liệu để xóa: ${response.statusCode}");
-      } else if (response.statusCode == 500) {
-        throw Exception("Lỗi server: ${response.statusCode} - ${response.body}");
+        throw Exception("Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.");
       } else {
-        throw Exception("Lỗi không xác định: ${response.statusCode} - ${response.body}");
+        final errorBody = jsonDecode(response.body);
+        throw Exception('Lỗi ${response.statusCode}: ${errorBody["error"] ?? response.body}');
       }
-    } on TimeoutException {
-      throw Exception("Kết nối đến server quá lâu. Vui lòng thử lại.");
-    } on FormatException {
-      throw Exception("Dữ liệu từ server không đúng định dạng.");
-    } on http.ClientException {
-      throw Exception("Không thể kết nối đến server. Kiểm tra API hoặc mạng.");
     } catch (e) {
-      throw Exception("Đã xảy ra lỗi không xác định: $e");
+      print('Error in deleteData: $e');
+      rethrow;
     }
+  }
+
+  // Gửi tin nhắn
+  static Future<Map<String, dynamic>> sendMessage(
+      int receiverId,
+      String content, {
+        String receiverType = 'App\\Models\\User',
+      }) async {
+    return await postData('messages', {
+      'receiver_id': receiverId,
+      'receiver_type': receiverType,
+      'content': content,
+    });
+  }
+
+  // Lấy danh sách tin nhắn
+  static Future<List<dynamic>> getMessages(
+      int receiverId, {
+        String receiverType = 'App\\Models\\User',
+      }) async {
+    final uri = Uri.parse("$baseUrl/messages/$receiverId")
+        .replace(queryParameters: {'receiver_type': receiverType});
+    final response = await getData(uri.toString());
+    return response['data'];
+  }
+
+  // Đánh dấu tin nhắn đã đọc
+  static Future<Map<String, dynamic>> markMessageAsRead(int messageId) async {
+    return await postData('messages/$messageId/read', {});
+  }
+
+  // Lấy danh sách thông báo
+  static Future<List<dynamic>> getNotifications(int userId) async {
+    final uri = Uri.parse("$baseUrl/notifications?user_id=$userId");
+    final response = await getData(uri.toString());
+    return response['data'];
+  }
+
+  // Đánh dấu thông báo đã đọc
+  static Future<Map<String, dynamic>> markNotificationAsRead(int notificationId) async {
+    return await postData('notifications/$notificationId/read', {});
+  }
+
+  // Lấy danh sách người dùng
+  static Future<List<dynamic>> getUsers() async {
+    final response = await getData('users');
+    return response['users'];
+  }
+
+  // Lấy thông tin người dùng hiện tại
+  static Future<Map<String, dynamic>> getUser() async {
+    final response = await getData('user');
+    return response['user'];
+  }
+
+  // Lấy danh sách admin
+  static Future<List<dynamic>> getAdmins() async {
+    final response = await getData('admins');
+    return response['admins'];
+  }
+
+  // Lấy URL hình ảnh
+  static String getImageUrl(String imagePath) {
+    return '$storageUrl/$imagePath';
   }
 }

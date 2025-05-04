@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../routes.dart';
 import '../providers/category_provider.dart';
-import '../providers/notification_provider.dart'; // Thêm NotificationProvider
+import '../providers/chat_provider.dart'; // Thay NotificationProvider bằng ChatProvider
 import '../core/api/auth_service.dart'; // Để lấy token
 
 // Các màn hình con
@@ -32,10 +32,13 @@ class _MainScreenState extends State<MainScreen> {
 
     // Tải thông báo khi khởi tạo MainScreen
     final authService = AuthService();
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     authService.getToken().then((token) {
-      if (token != null) {
-        Provider.of<NotificationProvider>(context, listen: false)
-            .fetchNotifications(token);
+      if (token != null && chatProvider.currentUserId == null) {
+        // Giả định userId = 14, thay bằng cách lấy từ AuthService nếu có
+        int userId = 14;
+        chatProvider.fetchNotifications(userId, context);
+        chatProvider.startPolling(context);
       }
     });
   }
@@ -84,10 +87,10 @@ class _MainScreenState extends State<MainScreen> {
               Navigator.pushNamed(context, AppRoutes.search);
             },
           ),
-          Consumer<NotificationProvider>(
-            builder: (context, notificationProvider, child) {
+          Consumer<ChatProvider>(
+            builder: (context, chatProvider, child) {
               // Đếm số thông báo chưa đọc
-              final unreadCount = notificationProvider.notifications
+              final unreadCount = chatProvider.notifications
                   .where((notification) => !notification.isRead)
                   .length;
 

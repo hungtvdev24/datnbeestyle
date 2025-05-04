@@ -1,7 +1,7 @@
+import 'dart:convert';
 import '../../core/api/api_client.dart';
 
 class ProductService {
-
   static const String popularEndpoint = 'products/popular-public';
   static const String searchEndpoint = 'search';
 
@@ -74,6 +74,31 @@ class ProductService {
     } catch (e) {
       print('Error in fetchReviews: $e');
       throw Exception('Error fetching reviews: $e');
+    }
+  }
+
+  // Lấy chi tiết sản phẩm theo ID (công khai, không cần token)
+  Future<Map<String, dynamic>> fetchProductById(int productId) async {
+    try {
+      final response = await ApiClient.getData('products/$productId', token: null);
+      print('Raw Response from ProductService (fetchProductById): $response');
+
+      if (response is Map && response.containsKey('product')) {
+        print('Product Data: ${response['product']}');
+        return response['product'] as Map<String, dynamic>;
+      } else if (response is Map && response.containsKey('message')) {
+        print('No product found: ${response['message']}');
+        throw Exception('No product found: ${response['message']}');
+      } else if (response is Map && response.containsKey('error')) {
+        print('API Error: ${response['error']}');
+        throw Exception('API Error: ${response['error']}');
+      } else {
+        print('Unexpected response format: $response');
+        throw Exception('Unexpected response format');
+      }
+    } catch (e) {
+      print('Error in fetchProductById: $e');
+      throw Exception('Error fetching product by ID: $e');
     }
   }
 }
