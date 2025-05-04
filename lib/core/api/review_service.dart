@@ -7,6 +7,7 @@ class ReviewService {
       String token,
       int orderId,
       int productId,
+      int variationId, // Thêm variationId
       int rating,
       String? comment,
       String? imageUrl,
@@ -14,6 +15,7 @@ class ReviewService {
     final data = {
       'id_donHang': orderId,
       'id_sanPham': productId,
+      'variation_id': variationId, // Thêm variation_id
       'soSao': rating,
       if (comment != null && comment.isNotEmpty) 'binhLuan': comment,
       if (imageUrl != null && imageUrl.isNotEmpty) 'urlHinhAnh': imageUrl,

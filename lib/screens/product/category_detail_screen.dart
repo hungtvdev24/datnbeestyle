@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../providers/favorite_product_provider.dart';
 import '../../providers/product_provider.dart';
+import '../../providers/user_provider.dart';
 import 'product_detail_screen.dart';
 
 class CategoryDetailScreen extends StatelessWidget {
@@ -20,11 +22,26 @@ class CategoryDetailScreen extends StatelessWidget {
     // Tải sản phẩm theo danh mục
     productProvider.loadSuggestedProducts(categoryId);
 
-    return Consumer<ProductProvider>(
-      builder: (context, productProvider, child) {
+    return Consumer2<ProductProvider, FavoriteProductProvider>(
+      builder: (context, productProvider, favoriteProvider, child) {
         return Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
-            title: Text(categoryName),
+            backgroundColor: Colors.white,
+            elevation: 0,
+            title: Text(
+              categoryName,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: 'Roboto',
+              ),
+            ),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
           body: productProvider.isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -35,12 +52,34 @@ class CategoryDetailScreen extends StatelessWidget {
               children: [
                 Text(
                   productProvider.errorMessage ?? "Lỗi không xác định",
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 16,
+                    fontFamily: 'Roboto',
+                  ),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () => productProvider.loadSuggestedProducts(categoryId),
-                  child: const Text("Thử lại"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      side: const BorderSide(color: Colors.black),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    "Thử lại",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                      fontFamily: 'Roboto',
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -49,7 +88,11 @@ class CategoryDetailScreen extends StatelessWidget {
               ? const Center(
             child: Text(
               "Không có sản phẩm nào trong danh mục này",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+                fontFamily: 'Roboto',
+              ),
             ),
           )
               : GridView.builder(
@@ -63,7 +106,30 @@ class CategoryDetailScreen extends StatelessWidget {
             itemCount: productProvider.suggestedProducts.length,
             itemBuilder: (context, index) {
               final product = productProvider.suggestedProducts[index];
-              return _buildProductCard(context, product, isFavorite: false);
+              final isFavorite = favoriteProvider.favorites.any(
+                    (fav) => fav['id_sanPham'] == product['id_sanPham'],
+              );
+              return _buildProductCard(
+                context,
+                product,
+                isFavorite: isFavorite,
+                onToggleFavorite: () {
+                  final userProvider = Provider.of<UserProvider>(context, listen: false);
+                  if (userProvider.token != null) {
+                    if (isFavorite) {
+                      favoriteProvider.removeFavoriteProduct(
+                        userProvider.token!,
+                        product['id_sanPham'],
+                      );
+                    } else {
+                      favoriteProvider.addFavoriteProduct(
+                        userProvider.token!,
+                        product['id_sanPham'],
+                      );
+                    }
+                  }
+                },
+              );
             },
           ),
         );
@@ -71,35 +137,78 @@ class CategoryDetailScreen extends StatelessWidget {
     );
   }
 
-  // Widget hiển thị thẻ sản phẩm
-  Widget _buildProductCard(BuildContext context, dynamic product, {required bool isFavorite}) {
+  Widget _buildProductCard(
+      BuildContext context,
+      dynamic product, {
+        required bool isFavorite,
+        required VoidCallback onToggleFavorite,
+      }) {
     final formatCurrency = NumberFormat("#,###", "vi_VN");
 
-    final imageUrl = product['urlHinhAnh']?.toString().startsWith('http') == true
-        ? product['urlHinhAnh']
-        : "https://72f7-104-28-254-73.ngrok-free.app/images/default.png";
+    // Lấy URL hình ảnh từ variations
+    String imageUrl;
+    if (product['variations'] != null &&
+        product['variations'].isNotEmpty &&
+        product['variations'][0]['images'] != null &&
+        product['variations'][0]['images'].isNotEmpty) {
+      imageUrl = product['variations'][0]['images'][0]['image_url']?.toString() ??
+          "https://picsum.photos/400/200";
+    } else {
+      imageUrl = "https://picsum.photos/400/200";
+    }
+
+    // Lấy size từ variations (nếu có)
+    String? size;
+    if (product['variations'] != null &&
+        product['variations'].isNotEmpty &&
+        product['variations'][0]['size'] != null) {
+      size = product['variations'][0]['size'].toString();
+    }
+
+    // Lấy giá từ variation nếu có, nếu không thì lấy từ product['gia']
+    final double price = product['variations'] != null &&
+        product['variations'].isNotEmpty &&
+        product['variations'][0]['price'] != null
+        ? (double.tryParse(product['variations'][0]['price'].toString()) ?? 0.0)
+        : (double.tryParse(product['gia'].toString()) ?? 0.0);
+
+    final priceText = "${formatCurrency.format(price)} VNĐ";
+
+    print("Image URL for product ${product['tenSanPham']}: $imageUrl");
+
     final thuongHieu = product['thuongHieu'] ?? "Không có thương hiệu";
     final tenSanPham = product['tenSanPham'] ?? "Không có tên";
-    final double originalPrice = double.tryParse(product['gia'].toString()) ?? 0.0;
-
-    const bool hasDiscount = true;
-    const double discountPercent = 20;
-    final double discountedPrice = originalPrice * (1 - discountPercent / 100);
-
-    final discountedPriceText = "${formatCurrency.format(discountedPrice)} ₫";
-    final originalPriceText = "${formatCurrency.format(originalPrice)} ₫";
 
     return GestureDetector(
       onTap: () {
+        // Tạo dữ liệu sản phẩm để truyền vào ProductDetailScreen
+        final productDetail = {
+          'urlHinhAnh': imageUrl,
+          'thuongHieu': thuongHieu,
+          'tenSanPham': tenSanPham,
+          'gia': price,
+          'size': size,
+          'id_sanPham': product['id_sanPham'],
+          'id_danhMuc': product['id_danhMuc'],
+          'moTa': product['moTa'] ?? "Không có mô tả",
+          'soSaoDanhGia': product['soSaoDanhGia'] ?? 0,
+          'variations': product['variations'] ?? [],
+        };
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(product: product),
+            builder: (context) => ProductDetailScreen(product: productDetail),
           ),
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.black.withOpacity(0.2), // Viền đen mỏng, hơi nhạt
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(12), // Bo góc
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -107,8 +216,8 @@ class CategoryDetailScreen extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    topRight: Radius.circular(8),
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
                   ),
                   child: Image.network(
                     imageUrl,
@@ -133,32 +242,38 @@ class CategoryDetailScreen extends StatelessWidget {
                     },
                   ),
                 ),
-                if (hasDiscount)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        "$discountPercent% GIẢM",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFCE4EC), // Màu hồng nhạt
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      "Like",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Roboto',
                       ),
                     ),
                   ),
-                if (isFavorite)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: const Icon(Icons.favorite, color: Colors.red, size: 24),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.grey,
+                      size: 24,
+                    ),
+                    onPressed: onToggleFavorite,
                   ),
+                ),
               ],
             ),
             Expanded(
@@ -166,8 +281,8 @@ class CategoryDetailScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 decoration: const BoxDecoration(
                   borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
+                    bottomLeft: Radius.circular(12),
+                    bottomRight: Radius.circular(12),
                   ),
                   color: Colors.white,
                 ),
@@ -180,6 +295,7 @@ class CategoryDetailScreen extends StatelessWidget {
                         fontSize: 12,
                         color: Colors.grey,
                         fontWeight: FontWeight.w500,
+                        fontFamily: 'Roboto',
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -191,39 +307,21 @@ class CategoryDetailScreen extends StatelessWidget {
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
+                        fontFamily: 'Roboto',
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const Spacer(),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            discountedPriceText,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (hasDiscount) ...[
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              originalPriceText,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ],
+                    Text(
+                      priceText,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                        fontFamily: 'Roboto',
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -234,4 +332,4 @@ class CategoryDetailScreen extends StatelessWidget {
       ),
     );
   }
-}
+}  /// update lần 4
