@@ -31,6 +31,23 @@ class Voucher {
 
   factory Voucher.fromJson(Map<String, dynamic> json) {
     print('Parsing voucher from JSON: $json');
+    final now = DateTime.now();
+    final startDate = json['start_date'] != null
+        ? DateTime.parse(json['start_date'])
+        : null;
+    final endDate = json['end_date'] != null
+        ? DateTime.parse(json['end_date'])
+        : null;
+    final usageLimit = json['usage_limit'] as int?;
+    final usedCount = json['used_count'] ?? 0;
+
+    // Kiểm tra voucher có khả dụng không
+    bool isUsable = json['status'] == 'active' &&
+        !json['is_used'] &&
+        (startDate == null || startDate.isBefore(now)) &&
+        (endDate == null || endDate.isAfter(now)) &&
+        (usageLimit == null || usedCount < usageLimit);
+
     final voucher = Voucher(
       id: json['id'],
       code: json['code'],
@@ -42,14 +59,10 @@ class Voucher {
       maxDiscount: json['max_discount'] != null
           ? double.parse(json['max_discount'].toString())
           : null,
-      startDate: json['start_date'] != null
-          ? DateTime.parse(json['start_date'])
-          : null,
-      endDate: json['end_date'] != null
-          ? DateTime.parse(json['end_date'])
-          : null,
-      usageLimit: json['usage_limit'],
-      usedCount: json['used_count'] ?? 0,
+      startDate: startDate,
+      endDate: endDate,
+      usageLimit: usageLimit,
+      usedCount: usedCount,
       status: json['status'],
       isUsed: json['is_used'] ?? false,
     );
@@ -80,7 +93,8 @@ class Voucher {
     return status == 'active' &&
         !isUsed &&
         (startDate == null || startDate!.isBefore(now)) &&
-        (endDate == null || endDate!.isAfter(now));
+        (endDate == null || endDate!.isAfter(now)) &&
+        (usageLimit == null || usedCount < usageLimit!);
   }
 
   @override

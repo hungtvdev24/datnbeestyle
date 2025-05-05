@@ -226,11 +226,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     final int quantity = item['soLuong'] ?? 1;
     final int productId = item['id_sanPham'] ?? 0;
     final int variationId = item['variation_id'] ?? 0;
-    final String? image = item['variation'] != null &&
+
+    // Lấy URL hình ảnh từ variation nếu có, nếu không thì từ san_pham['urlHinhAnh']
+    String? image;
+    if (item['variation'] != null &&
         item['variation']['images'] != null &&
-        item['variation']['images'].isNotEmpty
-        ? ApiClient.getImageUrl(item['variation']['images'][0]['image_url'])
-        : "https://picsum.photos/150";
+        item['variation']['images'].isNotEmpty) {
+      image = ApiClient.getImageUrl(item['variation']['images'][0]['image_url']);
+    } else {
+      image = item['san_pham'] != null && item['san_pham']['urlHinhAnh'] != null
+          ? item['san_pham']['urlHinhAnh']
+          : "https://via.placeholder.com/150";
+    }
 
     final bool hasReviewed = _hasReviewed[productId] ?? false;
 
@@ -417,17 +424,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              orderDetail['diaChiGiaoHang'] ?? 'Chưa có thông tin',
+              "${orderDetail['ten_nha'] ?? ''}, ${orderDetail['xa'] ?? ''}, ${orderDetail['huyen'] ?? ''}, ${orderDetail['tinh'] ?? ''}",
               style: const TextStyle(fontSize: 14, fontFamily: 'Roboto'),
             ),
             const SizedBox(height: 4),
             Text(
-              orderDetail['tenNguoiNhan'] ?? 'Chưa có thông tin',
+              orderDetail['ten_nguoiNhan'] ?? 'Chưa có thông tin',
               style: const TextStyle(fontSize: 14, fontFamily: 'Roboto'),
             ),
             const SizedBox(height: 4),
             Text(
-              orderDetail['soDienThoai'] ?? 'Chưa có thông tin',
+              orderDetail['sdt_nhanHang'] ?? 'Chưa có thông tin',
               style: const TextStyle(fontSize: 14, fontFamily: 'Roboto'),
             ),
           ],

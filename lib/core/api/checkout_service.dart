@@ -10,6 +10,7 @@ class CheckoutService {
     required List<Map<String, dynamic>> selectedItems,
     String? message,
     String? voucherCode,
+    double? totalAmount,
   }) async {
     try {
       final data = {
@@ -25,6 +26,8 @@ class CheckoutService {
         }).toList(),
         'message': message ?? '',
         'voucher_code': voucherCode,
+        if (phuongThucThanhToan == 'VN_PAY' && totalAmount != null)
+          'total_amount': totalAmount,
       };
 
       final response = await ApiClient.postData('checkout', data, token: token);
@@ -35,7 +38,13 @@ class CheckoutService {
         'qr_code': response['qr_code'] as String? ?? '',
       };
     } catch (e) {
-      throw Exception('Lỗi khi đặt hàng: $e');
+      if (e.toString().contains('401')) {
+        throw Exception('Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.');
+      } else if (e.toString().contains('403')) {
+        throw Exception('Không có quyền truy cập. Vui lòng kiểm tra thông tin người dùng.');
+      } else {
+        throw Exception('Lỗi khi đặt hàng: $e');
+      }
     }
   }
 }

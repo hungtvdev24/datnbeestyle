@@ -22,7 +22,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int quantity = 1;
   int currentImageIndex = 0;
   late PageController _pageController;
-  int visibleReviewsCount = 3; // Số lượng đánh giá hiển thị ban đầu
+  int visibleReviewsCount = 3;
 
   @override
   void initState() {
@@ -44,7 +44,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           name: widget.product['tenSanPham'] ?? "Không có tên",
           image: selectedVariation != null && selectedVariation!['images'].isNotEmpty
               ? selectedVariation!['images'][0]['image_url']
-              : widget.product['urlHinhAnh'] ?? "http://10.0.3.2:8001/images/default.png",
+              : widget.product['urlHinhAnh'] ?? "https://via.placeholder.com/150",
           price: selectedVariation != null
               ? (double.tryParse(selectedVariation!['price'].toString()) ?? 0.0)
               : (double.tryParse(widget.product['gia'].toString()) ?? 0.0),
@@ -152,7 +152,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
             final imageUrl = tempVariation != null && tempVariation!['images'].isNotEmpty
                 ? tempVariation!['images'][0]['image_url']
-                : widget.product['urlHinhAnh'] ?? "http://10.0.3.2:8001/images/default.png";
+                : widget.product['urlHinhAnh'] ?? "https://via.placeholder.com/150";
             final price = tempVariation != null
                 ? (double.tryParse(tempVariation!['price'].toString()) ?? 0.0)
                 : (double.tryParse(widget.product['gia'].toString()) ?? 0.0);
@@ -414,12 +414,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         product['variations'].isNotEmpty &&
         product['variations'][0]['images'] != null &&
         product['variations'][0]['images'].isNotEmpty
-        ? product['variations'][0]['images'][0]['image_url']?.toString() ?? "https://picsum.photos/400/200"
-        : "https://picsum.photos/400/200";
+        ? product['variations'][0]['images'][0]['image_url']?.toString() ?? "https://via.placeholder.com/150"
+        : "https://via.placeholder.com/150";
     final thuongHieu = product['thuongHieu'] ?? "Không có thương hiệu";
     final tenSanPham = product['tenSanPham'] ?? "Không có tên";
-    final double originalPrice = double.tryParse(product['gia'].toString()) ?? 0.0;
+    final double originalPrice = double.tryParse(product['variations'] != null &&
+        product['variations'].isNotEmpty
+        ? product['variations'][0]['price'].toString()
+        : product['gia'].toString()) ?? 0.0;
     final originalPriceText = "${formatCurrency.format(originalPrice)} VNĐ";
+    final avgRating = product['soSaoDanhGia'] ?? 0;
 
     return GestureDetector(
       onTap: () {
@@ -431,9 +435,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           'id_sanPham': product['id_sanPham'],
           'id_danhMuc': product['id_danhMuc'],
           'moTa': product['moTa'] ?? "Không có mô tả",
-          'soSaoDanhGia': product['soSaoDanhGia'] ?? 0,
+          'soSaoDanhGia': avgRating,
+          'variations': product['variations'] ?? [],
         };
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => ProductDetailScreen(product: productDetail),
@@ -441,12 +446,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         );
       },
       child: Container(
+        width: 150,
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.black.withOpacity(0.2), // Viền đen mỏng, hơi nhạt
+            color: Colors.black.withOpacity(0.2),
             width: 1,
           ),
-          borderRadius: BorderRadius.circular(12), // Bo góc
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -487,7 +493,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFCE4EC), // Màu hồng nhạt
+                      color: const Color(0xFFFCE4EC),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -503,7 +509,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
               ],
             ),
-            Expanded(
+            Flexible(
               child: Container(
                 padding: const EdgeInsets.all(8.0),
                 decoration: const BoxDecoration(
@@ -515,11 +521,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       thuongHieu,
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 11, // Giảm font size
                         color: Colors.grey,
                         fontWeight: FontWeight.w500,
                         fontFamily: 'Roboto',
@@ -531,19 +538,30 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     Text(
                       tenSanPham,
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 13, // Giảm font size
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                         fontFamily: 'Roboto',
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1, // Giới hạn 1 dòng
+                      overflow: TextOverflow.ellipsis, // Ẩn nội dung dài bằng dấu ...
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: List.generate(
+                        5,
+                            (index) => Icon(
+                          index < avgRating ? Icons.star : Icons.star_border,
+                          color: Colors.yellow,
+                          size: 14, // Giảm kích thước icon
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     Text(
                       originalPriceText,
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 12, // Giảm font size
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                         fontFamily: 'Roboto',
@@ -567,9 +585,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ? variations
         .map<String>((v) => v['images'].isNotEmpty
         ? v['images'][0]['image_url']
-        : widget.product['urlHinhAnh'] ?? "http://10.0.3.2:8001/images/default.png")
+        : widget.product['urlHinhAnh'] ?? "https://via.placeholder.com/150")
         .toList()
-        : [widget.product['urlHinhAnh'] ?? "http://10.0.3.2:8001/images/default.png"];
+        : [widget.product['urlHinhAnh'] ?? "https://via.placeholder.com/150"];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -758,7 +776,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     margin: const EdgeInsets.symmetric(vertical: 8),
                                     padding: const EdgeInsets.all(16.0),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[200], // Nền màu xám
+                                      color: Colors.grey[200],
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Column(
@@ -861,7 +879,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           return Column(
                             children: [
                               SizedBox(
-                                height: 220,
+                                height: 260, // Tăng chiều cao để tránh overflow
                                 child: ListView.builder(
                                   scrollDirection: Axis.horizontal,
                                   itemCount: suggestedProducts.length > 4 ? 4 : suggestedProducts.length,
@@ -878,7 +896,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               const SizedBox(height: 16),
                               if (suggestedProducts.length > 4)
                                 SizedBox(
-                                  height: 220,
+                                  height: 260, // Tăng chiều cao để tránh overflow
                                   child: ListView.builder(
                                     scrollDirection: Axis.horizontal,
                                     itemCount: suggestedProducts.length > 8 ? 4 : suggestedProducts.length - 4,
@@ -923,7 +941,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Colors.black),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            padding: const EdgeInsets.symmetric(vertical: 16), // Đảm bảo chiều cao bằng nhau
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             minimumSize: const Size(0, 50),
                           ),
                           child: Icon(
@@ -943,7 +961,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.black),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(vertical: 16), // Đảm bảo chiều cao bằng nhau
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         minimumSize: const Size(0, 50),
                       ),
                       child: const Icon(
@@ -961,7 +979,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.black),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(vertical: 16), // Đảm bảo chiều cao bằng nhau
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         minimumSize: const Size(0, 50),
                       ),
                       child: const Text(

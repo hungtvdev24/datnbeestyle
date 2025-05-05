@@ -34,13 +34,7 @@ class CheckoutProvider with ChangeNotifier {
       orderData = response['donHang'];
       qrCode = response['qr_code'];
     } catch (e) {
-      if (e.toString().contains('TimeoutException')) {
-        errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và thử lại.';
-      } else if (e.toString().contains('Đơn hàng không đạt giá trị tối thiểu')) {
-        errorMessage = e.toString().split('Exception: ')[1];
-      } else {
-        errorMessage = 'Đã xảy ra lỗi: $e';
-      }
+      errorMessage = _handleError(e);
     } finally {
       isLoading = false;
       notifyListeners();
@@ -59,6 +53,7 @@ class CheckoutProvider with ChangeNotifier {
     isLoading = true;
     errorMessage = null;
     qrCode = null;
+    orderData = null;
     notifyListeners();
 
     try {
@@ -69,23 +64,33 @@ class CheckoutProvider with ChangeNotifier {
         selectedItems: selectedItems,
         message: message,
         voucherCode: voucherCode,
+        totalAmount: totalAmount,
       );
 
       qrCode = response['qr_code'];
-      if (qrCode == null || qrCode!.isEmpty) {
+      orderData = response['donHang'];
+      if (phuongThucThanhToan == 'VN_PAY' && (qrCode == null || qrCode!.isEmpty)) {
         throw Exception('Không nhận được URL thanh toán từ server');
       }
     } catch (e) {
-      if (e.toString().contains('TimeoutException')) {
-        errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và thử lại.';
-      } else if (e.toString().contains('Đơn hàng không đạt giá trị tối thiểu')) {
-        errorMessage = e.toString().split('Exception: ')[1];
-      } else {
-        errorMessage = 'Đã xảy ra lỗi: $e';
-      }
+      errorMessage = _handleError(e);
     } finally {
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  String _handleError(dynamic e) {
+    if (e.toString().contains('401')) {
+      return 'Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.';
+    } else if (e.toString().contains('403')) {
+      return 'Không có quyền truy cập. Vui lòng kiểm tra thông tin người dùng.';
+    } else if (e.toString().contains('TimeoutException')) {
+      return 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và thử lại.';
+    } else if (e.toString().contains('Đơn hàng không đạt giá trị tối thiểu')) {
+      return e.toString().split('Exception: ')[1];
+    } else {
+      return 'Lỗi: $e';
     }
   }
 }

@@ -65,6 +65,8 @@ class ApiClient {
         return jsonDecode(response.body);
       } else if (response.statusCode == 401) {
         throw Exception("Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.");
+      } else if (response.statusCode == 403) {
+        throw Exception("Không có quyền truy cập. Vui lòng kiểm tra thông tin người dùng.");
       } else if (response.statusCode == 422) {
         final errorBody = jsonDecode(response.body);
         throw Exception('Dữ liệu không hợp lệ: ${errorBody["errors"] ?? response.body}');
@@ -102,6 +104,8 @@ class ApiClient {
         return jsonDecode(response.body);
       } else if (response.statusCode == 401) {
         throw Exception("Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.");
+      } else if (response.statusCode == 403) {
+        throw Exception("Không có quyền truy cập. Vui lòng kiểm tra thông tin người dùng.");
       } else {
         final errorBody = jsonDecode(response.body);
         throw Exception('Lỗi ${response.statusCode}: ${errorBody["error"] ?? response.body}');
@@ -142,11 +146,11 @@ class ApiClient {
         return jsonDecode(response.body);
       } else if (response.statusCode == 401) {
         throw Exception("Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.");
+      } else if (response.statusCode == 403) {
+        throw Exception("Không có quyền truy cập. Vui lòng kiểm tra thông tin người dùng.");
       } else {
         final errorBody = jsonDecode(response.body);
-        throw Exception('Lỗi ${response.statusCode}: ${errorBody["error"]
-
-            ?? response.body}');
+        throw Exception('Lỗi ${response.statusCode}: ${errorBody["error"] ?? response.body}');
       }
     } catch (e) {
       print('Error in putData: $e');
@@ -178,6 +182,8 @@ class ApiClient {
         return {"message": "Xóa thành công"};
       } else if (response.statusCode == 401) {
         throw Exception("Token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.");
+      } else if (response.statusCode == 403) {
+        throw Exception("Không có quyền truy cập. Vui lòng kiểm tra thông tin người dùng.");
       } else {
         final errorBody = jsonDecode(response.body);
         throw Exception('Lỗi ${response.statusCode}: ${errorBody["error"] ?? response.body}');
@@ -249,6 +255,9 @@ class ApiClient {
 
   // Lấy URL hình ảnh
   static String getImageUrl(String imagePath) {
+    if (imagePath.isEmpty || imagePath.startsWith('http')) {
+      return imagePath;
+    }
     return '$storageUrl/$imagePath';
   }
 }

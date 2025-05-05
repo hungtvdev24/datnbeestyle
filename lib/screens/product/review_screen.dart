@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../core/api/api_client.dart';
 import '../../providers/review_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/myorder_provider.dart';
 import '../product/product_detail_screen.dart';
+import '../order/order_detail_screen.dart';
 
 class ReviewScreen extends StatefulWidget {
   final int orderId;
@@ -30,11 +32,13 @@ class ReviewScreenState extends State<ReviewScreen> {
   @override
   void initState() {
     super.initState();
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final myOrderProvider = Provider.of<MyOrderProvider>(context, listen: false);
-    if (userProvider.token != null) {
-      myOrderProvider.loadOrderDetail(userProvider.token!, widget.orderId);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final myOrderProvider = Provider.of<MyOrderProvider>(context, listen: false);
+      if (userProvider.token != null) {
+        myOrderProvider.loadOrderDetail(userProvider.token!, widget.orderId);
+      }
+    });
   }
 
   @override
@@ -178,7 +182,20 @@ class ReviewScreenState extends State<ReviewScreen> {
                                   ),
                                 ),
                               );
-                              Navigator.pop(context, true);
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => OrderDetailScreen(orderId: widget.orderId),
+                                ),
+                              ).then((value) {
+                                if (value == true) {
+                                  final userProvider = Provider.of<UserProvider>(context, listen: false);
+                                  final myOrderProvider = Provider.of<MyOrderProvider>(context, listen: false);
+                                  if (userProvider.token != null) {
+                                    myOrderProvider.loadOrders(userProvider.token!);
+                                  }
+                                }
+                              });
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -225,12 +242,15 @@ class ReviewScreenState extends State<ReviewScreen> {
     final String? name = productItem['san_pham'] != null ? productItem['san_pham']['tenSanPham'] : null;
     final String? size = productItem['variation'] != null ? productItem['variation']['size'] : null;
     final double price = double.tryParse(productItem['gia']?.toString() ?? '0') ?? 0.0;
-    final int productId = productItem['id_sanPham'] ?? 0; // Lấy id_sanPham
-    final String? image = productItem['variation'] != null &&
+    final int productId = productItem['id_sanPham'] ?? 0;
+    String? image;
+    if (productItem['variation'] != null &&
         productItem['variation']['images'] != null &&
-        (productItem['variation']['images'] as List).isNotEmpty
-        ? "http://212a-104-28-254-73.ngrok-free.app/storage/${productItem['variation']['images'][0]['image_url']}"
-        : null;
+        (productItem['variation']['images'] as List).isNotEmpty) {
+      image = ApiClient.getImageUrl(productItem['variation']['images'][0]['image_url']);
+    } else {
+      image = "https://via.placeholder.com/150";
+    }
 
     final double screenWidth = MediaQuery.of(context).size.width;
     final double imageSize = screenWidth * 0.15;
@@ -239,7 +259,7 @@ class ReviewScreenState extends State<ReviewScreen> {
       onTap: () {
         final productDetail = {
           'id_sanPham': productId,
-          'urlHinhAnh': image ?? "https://picsum.photos/150",
+          'urlHinhAnh': image,
           'thuongHieu': thuongHieu,
           'tenSanPham': name,
           'gia': price,
@@ -270,7 +290,7 @@ class ReviewScreenState extends State<ReviewScreen> {
                   bottomLeft: Radius.circular(12),
                 ),
                 child: Image.network(
-                  image ?? "https://picsum.photos/150",
+                  image,
                   width: imageSize,
                   height: imageSize,
                   fit: BoxFit.cover,
@@ -336,7 +356,7 @@ class ReviewScreenState extends State<ReviewScreen> {
                     Text(
                       "${formatCurrency.format(price)} ₫",
                       style: TextStyle(
-                        fontSize: screenWidth * 0.034,
+                        fontSize: screenWidth * 0.032,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                         fontFamily: 'Roboto',

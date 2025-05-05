@@ -264,13 +264,32 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
                       ? Center(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        cartProvider.errorMessage!,
-                        style: const TextStyle(
-                          color: Colors.red,
-                          fontFamily: 'Roboto',
-                        ),
-                        textAlign: TextAlign.center,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            cartProvider.errorMessage!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontFamily: 'Roboto',
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          IconButton(
+                            icon: const Icon(Icons.refresh, color: Colors.blue, size: 32),
+                            onPressed: _loadCart,
+                            tooltip: 'Tải lại giỏ hàng',
+                          ),
+                          const Text(
+                            'Thử lại',
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontFamily: 'Roboto',
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   )
@@ -380,7 +399,6 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
     final double imageSize = screenWidth * 0.15;
     final double arrowButtonSize = screenWidth * 0.04;
 
-    // Chuẩn bị dữ liệu sản phẩm để truyền vào ProductDetailScreen
     final productDetail = {
       'urlHinhAnh': image ?? "https://picsum.photos/150",
       'thuongHieu': thuongHieu ?? "Không có thương hiệu",
@@ -475,8 +493,7 @@ class _CartScreenState extends State<CartScreen> with RouteAware {
       int index,
       BuildContext context,
       double arrowButtonSize,
-      String? size,
-      ) {
+      String? size) {
     final double screenWidth = MediaQuery.of(context).size.width;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
